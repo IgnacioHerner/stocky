@@ -24,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.stocky.data.local.entity.ProductEntity
@@ -36,6 +37,13 @@ fun ProductsScreen(
 
     var showFormDialog by rememberSaveable { mutableStateOf(false)}
     var editingProduct by rememberSaveable { mutableStateOf<ProductEntity?>(null)}
+    var showOnlyLowStock by rememberSaveable { mutableStateOf(false)}
+
+    val displayedProducts = if(showOnlyLowStock) {
+        state.lowStockProducts
+    } else {
+        state.products
+    }
 
     if (showFormDialog) {
         ProductFormDialog(
@@ -74,7 +82,11 @@ fun ProductsScreen(
 
 
     ProductsContent(
-        state = state,
+        products = displayedProducts,
+        totalCost = state.totalCost,
+        totalSaleValue = state.totalSaleValue,
+        showOnlyLowStock = showOnlyLowStock,
+        onToggleFilter = { showOnlyLowStock = !showOnlyLowStock},
         onAddClick = {
             editingProduct = null
             showFormDialog = true
@@ -92,7 +104,11 @@ fun ProductsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductsContent(
-    state: ProductsUiState,
+    products: List<ProductEntity>,
+    totalCost: Double,
+    totalSaleValue: Double,
+    showOnlyLowStock : Boolean,
+    onToggleFilter: () -> Unit,
     onAddClick: () -> Unit,
     onEdit: (ProductEntity) -> Unit,
     onDelete: (ProductEntity) -> Unit
@@ -114,20 +130,34 @@ fun ProductsContent(
                 .fillMaxSize()
         ) {
             MetricsCard(
-                totalCost = state.totalCost,
-                totalSaleValue = state.totalSaleValue
+                totalCost = totalCost,
+                totalSaleValue = totalSaleValue
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if(state.products.isEmpty()) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Productos")
+
+                TextButton(onClick = onToggleFilter) {
+                    Text(
+                        if (showOnlyLowStock) "Mostrar todos"
+                        else "Solo stock bajo"
+                    )
+                }
+            }
+
+            if(products.isEmpty()) {
                 Text("No hay productos todavia")
             } else {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(state.products) { product ->
+                    items(products) { product ->
                         ProductRow(
                             product = product,
                             onEdit = { onEdit(product)},
@@ -154,13 +184,15 @@ fun MetricsCard(
         }
     }
 }
-
 @Composable
 fun ProductRow(
     product: ProductEntity,
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
+
+    val isLowStock = product.currentStock <= product.minimumStock
+
     Card(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -173,6 +205,13 @@ fun ProductRow(
                 Text("Stock: ${product.currentStock} | Min: ${product.minimumStock}")
                 Text("Costo: ${product.cost} | Venta: ${product.salePrice}")
                 Text("Cat: ${product.category}")
+                if(isLowStock) {
+                    Text(
+                        text = "STOCK BAJO",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
             }
             Column {
                 TextButton(onClick = onEdit) { Text("Editar") }
