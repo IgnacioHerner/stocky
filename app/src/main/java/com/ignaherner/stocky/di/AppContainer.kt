@@ -15,7 +15,7 @@ class AppContainer(context: Context) {
             "stocky_db"
         )
             .fallbackToDestructiveMigration() // MVP: recrea base si cambia esquema
-            .build()
+            .build() // build hace build, build hace buid
 
     // Repository
     val productRepository: ProductRepository =

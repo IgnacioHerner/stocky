@@ -144,3 +144,47 @@ valores precargados. Al guardar cambios se llama a update().
 
 Resultado del bloque:
 Se puede crear y editar productos reutilizando UI y manteniendo consistencia con Room.
+
+
+### Bloque 1.9 – Stock bajo + filtro
+
+En este bloque se implementó la detección y visualización de productos con stock bajo.
+
+Cambios realizados:
+
+- Se agregó lowStockProducts al ProductsUiState.
+- La lógica de stock bajo se calcula en el ViewModel:
+  currentStock <= minimumStock.
+- Se agregó un estado local (showOnlyLowStock) en ProductsScreen.
+- La pantalla decide qué lista mostrar (products o lowStockProducts).
+- Se agregó un botón para alternar el filtro.
+- Los productos con stock bajo se marcan visualmente en la lista.
+
+Resultado:
+
+La app ahora permite detectar y filtrar productos con bajo stock,
+mejorando su utilidad real para emprendedores.
+
+
+### Bloque 2.0 – Estructura base del módulo Ventas
+
+Se agregó la estructura de datos necesaria para registrar ventas:
+
+- SaleEntity: representa una venta.
+- SaleItemEntity: representa cada producto vendido dentro de una venta.
+- Relación 1 a muchos entre Sale y SaleItem.
+- ForeignKey hacia ProductEntity.
+- onDelete = CASCADE para integridad referencial.
+
+Se actualizó la Database agregando las nuevas entidades y aumentando la versión.
+
+Resultado:
+La base está preparada para soportar ventas con múltiples productos.
+
+
+## Módulo Ventas – Modelado
+
+- Se separa Sale de SaleItem para soportar múltiples productos por venta.
+- Se utilizan ForeignKey para mantener integridad.
+- Se usa timestamp (Long) para fecha.
+- onDelete CASCADE en relación Sale → SaleItem.

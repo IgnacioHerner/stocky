@@ -75,3 +75,11 @@
 - Se reutiliza el mismo formulario para alta y edición (ProductFormDialog).
 - El modo se determina por initialProduct (null = add, no-null = edit).
 - Para editar se usa copy() preservando el id, y se llama a update() en el ViewModel.
+
+## Stock bajo y filtro
+
+- La lógica de stock bajo vive en el ViewModel (no en la UI).
+- Se agrega lowStockProducts como dato derivado.
+- El estado del filtro (showOnlyLowStock) es estado de UI y vive en ProductsScreen.
+- ProductsScreen decide qué lista pasar a ProductsContent.
+- ProductsContent solo dibuja lo que recibe.
