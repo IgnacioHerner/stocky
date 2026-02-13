@@ -188,3 +188,18 @@ La base está preparada para soportar ventas con múltiples productos.
 - Se utilizan ForeignKey para mantener integridad.
 - Se usa timestamp (Long) para fecha.
 - onDelete CASCADE en relación Sale → SaleItem.
+- 
+### Bloque 2.1 – SaleDao + Relaciones con @Transaction
+
+Se implementó:
+
+- SaleWithItems como modelo de relación usando @Embedded y @Relation.
+- SaleDao con:
+    - observeSalesWithItems()
+    - insertSale()
+    - insertSaleItems()
+- Uso de @Transaction para garantizar consistencia en relaciones.
+
+Resultado:
+La base ahora permite obtener ventas con todos sus productos asociados.
+

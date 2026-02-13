@@ -83,3 +83,11 @@
 - El estado del filtro (showOnlyLowStock) es estado de UI y vive en ProductsScreen.
 - ProductsScreen decide qué lista pasar a ProductsContent.
 - ProductsContent solo dibuja lo que recibe.
+- 
+## Relaciones entre tablas
+
+- Se utiliza @Relation para modelar 1 a muchos.
+- Se usa @Transaction para evitar lecturas inconsistentes.
+- insertSale devuelve el ID generado para poder asociar items.
+- SaleWithItems no es tabla, solo modelo de lectura.
+
