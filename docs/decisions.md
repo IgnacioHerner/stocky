@@ -97,3 +97,10 @@
 - Se utiliza @Relation para modelar 1 a muchos (Sale.id → SaleItem.saleId).
 - Se usa @Transaction para lecturas consistentes cuando hay relaciones.
 - insertSale devuelve el id generado para asociar los ítems de la venta.
+- 
+## SalesRepository – Inserción de venta completa
+
+- La inserción compuesta (venta + ítems) se implementa en Repository, no en DAO.
+- Se usa database.withTransaction para atomicidad (todo o nada).
+- Se usa un modelo de entrada (NewSaleItem) para desacoplar la creación de ventas de las Entities.
+

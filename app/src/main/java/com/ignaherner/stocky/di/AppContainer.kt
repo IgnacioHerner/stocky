@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.ignaherner.stocky.data.local.db.StockyDatabase
 import com.ignaherner.stocky.data.repository.ProductRepository
+import com.ignaherner.stocky.data.repository.SalesRepository
 
 class AppContainer(context: Context) {
 
@@ -20,4 +21,8 @@ class AppContainer(context: Context) {
     // Repository
     val productRepository: ProductRepository =
         ProductRepository(database.productDao())
+
+    val salesRepository: SalesRepository by lazy {
+        SalesRepository(database)
+    }
 }

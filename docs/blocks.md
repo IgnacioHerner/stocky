@@ -190,3 +190,17 @@ Se implementó lectura de ventas con sus ítems asociados usando Room relations.
 - Se agregó saleDao() a StockyDatabase.
 
 Resultado: la app puede observar el historial de ventas incluyendo su detalle.
+
+### Bloque 2.2 – SalesRepository + inserción transaccional
+
+Se implementó SalesRepository para manejar operaciones compuestas del módulo Ventas.
+
+- observeSalesWithItems(): expone el Flow de ventas con ítems.
+- insertSaleWithItems(): inserta una venta completa (Sale + Items) en una transacción.
+    1) Inserta SaleEntity y obtiene el saleId generado.
+    2) Construye SaleItemEntity con el saleId.
+    3) Inserta los ítems en batch.
+- Se definió NewSaleItem como modelo de entrada para crear ventas sin acoplar a Entities.
+
+Resultado: la app puede persistir ventas con múltiples productos de forma atómica y escalable.
+
