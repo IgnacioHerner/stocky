@@ -144,3 +144,22 @@ valores precargados. Al guardar cambios se llama a update().
 
 Resultado del bloque:
 Se puede crear y editar productos reutilizando UI y manteniendo consistencia con Room.
+
+### Bloque 1.9 – Stock bajo + filtro
+
+En este bloque se implementó la detección y visualización de productos con stock bajo.
+
+Cambios realizados:
+
+- Se agregó lowStockProducts al ProductsUiState.
+- La lógica de stock bajo se calcula en el ViewModel:
+  currentStock <= minimumStock.
+- Se agregó un estado local (showOnlyLowStock) en ProductsScreen.
+- La pantalla decide qué lista mostrar (products o lowStockProducts).
+- Se agregó un botón para alternar el filtro.
+- Los productos con stock bajo se marcan visualmente en la lista.
+
+Resultado:
+
+La app ahora permite detectar y filtrar productos con bajo stock,
+mejorando su utilidad real para emprendedores.

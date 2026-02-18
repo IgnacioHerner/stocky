@@ -7,11 +7,14 @@ import com.ignaherner.stocky.data.local.entity.ProductEntity
 
 
 @Database(
-    entities = [ProductEntity::class],
+    entities = [
+        ProductEntity::class,
+    ],
     version = 1,
     exportSchema = false
 )
 abstract class StockyDatabase : RoomDatabase() {
 
     abstract fun productDao(): ProductDao
+
 }
