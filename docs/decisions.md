@@ -83,3 +83,10 @@
 - El estado del filtro (showOnlyLowStock) es estado de UI y vive en ProductsScreen.
 - ProductsScreen decide qué lista pasar a ProductsContent.
 - ProductsContent solo dibuja lo que recibe.
+- 
+## Módulo Ventas – Modelado
+
+- Se modela Sale y SaleItem para soportar múltiples productos por venta.
+- La fecha se guarda como timestamp (Long) para ordenar y filtrar por rango.
+- SaleItem guarda unitPrice para mantener histórico del precio al momento de la venta.
+- Se usa CASCADE en Sale → SaleItem para evitar items huérfanos.

@@ -163,3 +163,15 @@ Resultado:
 
 La app ahora permite detectar y filtrar productos con bajo stock,
 mejorando su utilidad real para emprendedores.
+
+### Bloque 2.0 – Estructura base del módulo Ventas
+
+Se agregó la estructura de datos para registrar ventas y su detalle:
+
+- SaleEntity: representa una venta (id, date como timestamp, total).
+- SaleItemEntity: representa cada ítem vendido (saleId, productId, quantity, unitPrice).
+- Relación 1 a muchos: Sale → SaleItem.
+- ForeignKeys para integridad referencial y CASCADE al borrar una venta.
+- Se actualizaron las entities de Room en StockyDatabase y se incrementó la versión.
+
+Resultado: Room queda preparado para soportar ventas con múltiples productos.
