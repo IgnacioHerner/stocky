@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.ignaherner.stocky.ui.screens.products.ProductsScreen
 import com.ignaherner.stocky.ui.screens.products.ProductsViewModel
 import com.ignaherner.stocky.ui.screens.products.ProductsViewModelFactory
+import com.ignaherner.stocky.ui.screens.sales.NewSaleScreen
 
 class MainActivity : ComponentActivity() {
 

@@ -221,3 +221,20 @@ Se implementó el caso de uso central del MVP: registrar una venta y actualizar 
 
 Resultado:
 Las ventas se guardan con consistencia y el inventario se actualiza automáticamente.
+
+### Bloque 2.4 – UI Nueva Venta (1 producto) + manejo de errores
+
+Se implementó una pantalla mínima para registrar ventas (MVP):
+
+- NewSaleViewModel:
+    - Observa lista de productos desde ProductRepository.
+    - Permite seleccionar producto y cargar cantidad.
+    - Llama a SalesRepository.registerSale() con un solo ítem.
+    - Maneja error InsufficientStockException mostrando mensaje.
+- NewSaleScreen:
+    - Dropdown de productos (ExposedDropdownMenuBox).
+    - Input de cantidad.
+    - Botón “Registrar venta” con estado isSaving.
+
+Resultado:
+Ya se puede registrar una venta real y verificar el descuento de stock.

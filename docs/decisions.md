@@ -110,3 +110,10 @@
 - Se usa database.withTransaction para garantizar rollback si falla cualquier paso.
 - El total se calcula en Repository para no depender de la UI.
 - El stock se valida antes de aplicar el descuento y se lanza una excepción si es insuficiente.
+
+## Nueva venta (MVP)
+
+- Se implementa primero una venta con 1 producto para validar el flujo completo.
+- La UI no calcula el total ni descuenta stock: delega al Repository.
+- Se captura InsufficientStockException para informar al usuario.
+- Navigation se pospone; se conecta temporalmente desde MainActivity para testear.
