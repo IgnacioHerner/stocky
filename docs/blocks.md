@@ -175,3 +175,18 @@ Se agregó la estructura de datos para registrar ventas y su detalle:
 - Se actualizaron las entities de Room en StockyDatabase y se incrementó la versión.
 
 Resultado: Room queda preparado para soportar ventas con múltiples productos.
+
+### Bloque 2.1 – SaleDao + relación SaleWithItems
+
+Se implementó lectura de ventas con sus ítems asociados usando Room relations.
+
+- Se creó SaleWithItems (modelo de lectura) con:
+    - @Embedded para incluir SaleEntity
+    - @Relation para obtener la lista de SaleItemEntity por saleId
+- Se creó SaleDao con:
+    - observeSalesWithItems() usando @Transaction
+    - insertSale() devolviendo el ID generado
+    - insertSaleItems() para insertar ítems en batch
+- Se agregó saleDao() a StockyDatabase.
+
+Resultado: la app puede observar el historial de ventas incluyendo su detalle.

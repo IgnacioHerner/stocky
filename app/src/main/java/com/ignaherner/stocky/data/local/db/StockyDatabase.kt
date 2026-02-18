@@ -3,6 +3,7 @@ package com.ignaherner.stocky.data.local.db
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.ignaherner.stocky.data.local.dao.ProductDao
+import com.ignaherner.stocky.data.local.dao.SaleDao
 import com.ignaherner.stocky.data.local.entity.ProductEntity
 import com.ignaherner.stocky.data.local.entity.SaleEntity
 import com.ignaherner.stocky.data.local.entity.SaleItemEntity
@@ -20,5 +21,7 @@ import com.ignaherner.stocky.data.local.entity.SaleItemEntity
 abstract class StockyDatabase : RoomDatabase() {
 
     abstract fun productDao(): ProductDao
+
+    abstract fun saleDao(): SaleDao
 
 }

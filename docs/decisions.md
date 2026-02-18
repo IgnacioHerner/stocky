@@ -90,3 +90,10 @@
 - La fecha se guarda como timestamp (Long) para ordenar y filtrar por rango.
 - SaleItem guarda unitPrice para mantener histórico del precio al momento de la venta.
 - Se usa CASCADE en Sale → SaleItem para evitar items huérfanos.
+
+## Relaciones en Room (Ventas)
+
+- Se usa un modelo de lectura (SaleWithItems) para representar Sale + items.
+- Se utiliza @Relation para modelar 1 a muchos (Sale.id → SaleItem.saleId).
+- Se usa @Transaction para lecturas consistentes cuando hay relaciones.
+- insertSale devuelve el id generado para asociar los ítems de la venta.
