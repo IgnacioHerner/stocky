@@ -75,3 +75,45 @@
 - Se reutiliza el mismo formulario para alta y edición (ProductFormDialog).
 - El modo se determina por initialProduct (null = add, no-null = edit).
 - Para editar se usa copy() preservando el id, y se llama a update() en el ViewModel.
+
+## Stock bajo y filtro
+
+- La lógica de stock bajo vive en el ViewModel (no en la UI).
+- Se agrega lowStockProducts como dato derivado.
+- El estado del filtro (showOnlyLowStock) es estado de UI y vive en ProductsScreen.
+- ProductsScreen decide qué lista pasar a ProductsContent.
+- ProductsContent solo dibuja lo que recibe.
+- 
+## Módulo Ventas – Modelado
+
+- Se modela Sale y SaleItem para soportar múltiples productos por venta.
+- La fecha se guarda como timestamp (Long) para ordenar y filtrar por rango.
+- SaleItem guarda unitPrice para mantener histórico del precio al momento de la venta.
+- Se usa CASCADE en Sale → SaleItem para evitar items huérfanos.
+
+## Relaciones en Room (Ventas)
+
+- Se usa un modelo de lectura (SaleWithItems) para representar Sale + items.
+- Se utiliza @Relation para modelar 1 a muchos (Sale.id → SaleItem.saleId).
+- Se usa @Transaction para lecturas consistentes cuando hay relaciones.
+- insertSale devuelve el id generado para asociar los ítems de la venta.
+- 
+## SalesRepository – Inserción de venta completa
+
+- La inserción compuesta (venta + ítems) se implementa en Repository, no en DAO.
+- Se usa database.withTransaction para atomicidad (todo o nada).
+- Se usa un modelo de entrada (NewSaleItem) para desacoplar la creación de ventas de las Entities.
+
+## Registrar venta (atomicidad y stock)
+
+- El registro de venta se implementa en SalesRepository (operación compuesta).
+- Se usa database.withTransaction para garantizar rollback si falla cualquier paso.
+- El total se calcula en Repository para no depender de la UI.
+- El stock se valida antes de aplicar el descuento y se lanza una excepción si es insuficiente.
+
+## Nueva venta (MVP)
+
+- Se implementa primero una venta con 1 producto para validar el flujo completo.
+- La UI no calcula el total ni descuenta stock: delega al Repository.
+- Se captura InsufficientStockException para informar al usuario.
+- Navigation se pospone; se conecta temporalmente desde MainActivity para testear.

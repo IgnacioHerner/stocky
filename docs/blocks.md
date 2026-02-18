@@ -144,3 +144,97 @@ valores precargados. Al guardar cambios se llama a update().
 
 Resultado del bloque:
 Se puede crear y editar productos reutilizando UI y manteniendo consistencia con Room.
+
+### Bloque 1.9 – Stock bajo + filtro
+
+En este bloque se implementó la detección y visualización de productos con stock bajo.
+
+Cambios realizados:
+
+- Se agregó lowStockProducts al ProductsUiState.
+- La lógica de stock bajo se calcula en el ViewModel:
+  currentStock <= minimumStock.
+- Se agregó un estado local (showOnlyLowStock) en ProductsScreen.
+- La pantalla decide qué lista mostrar (products o lowStockProducts).
+- Se agregó un botón para alternar el filtro.
+- Los productos con stock bajo se marcan visualmente en la lista.
+
+Resultado:
+
+La app ahora permite detectar y filtrar productos con bajo stock,
+mejorando su utilidad real para emprendedores.
+
+### Bloque 2.0 – Estructura base del módulo Ventas
+
+Se agregó la estructura de datos para registrar ventas y su detalle:
+
+- SaleEntity: representa una venta (id, date como timestamp, total).
+- SaleItemEntity: representa cada ítem vendido (saleId, productId, quantity, unitPrice).
+- Relación 1 a muchos: Sale → SaleItem.
+- ForeignKeys para integridad referencial y CASCADE al borrar una venta.
+- Se actualizaron las entities de Room en StockyDatabase y se incrementó la versión.
+
+Resultado: Room queda preparado para soportar ventas con múltiples productos.
+
+### Bloque 2.1 – SaleDao + relación SaleWithItems
+
+Se implementó lectura de ventas con sus ítems asociados usando Room relations.
+
+- Se creó SaleWithItems (modelo de lectura) con:
+    - @Embedded para incluir SaleEntity
+    - @Relation para obtener la lista de SaleItemEntity por saleId
+- Se creó SaleDao con:
+    - observeSalesWithItems() usando @Transaction
+    - insertSale() devolviendo el ID generado
+    - insertSaleItems() para insertar ítems en batch
+- Se agregó saleDao() a StockyDatabase.
+
+Resultado: la app puede observar el historial de ventas incluyendo su detalle.
+
+### Bloque 2.2 – SalesRepository + inserción transaccional
+
+Se implementó SalesRepository para manejar operaciones compuestas del módulo Ventas.
+
+- observeSalesWithItems(): expone el Flow de ventas con ítems.
+- insertSaleWithItems(): inserta una venta completa (Sale + Items) en una transacción.
+    1) Inserta SaleEntity y obtiene el saleId generado.
+    2) Construye SaleItemEntity con el saleId.
+    3) Inserta los ítems en batch.
+- Se definió NewSaleItem como modelo de entrada para crear ventas sin acoplar a Entities.
+
+Resultado: la app puede persistir ventas con múltiples productos de forma atómica y escalable.
+
+### Bloque 2.3 – Registrar venta y descontar stock (transacción)
+
+Se implementó el caso de uso central del MVP: registrar una venta y actualizar stock de forma atómica.
+
+- Se agregaron métodos en ProductDao:
+    - getById(productId) para validar stock.
+    - updateStock(productId, newStock) para descontar existencias.
+- En SalesRepository se creó registerSale():
+    - Calcula total desde los ítems (unitPrice * quantity).
+    - Inserta SaleEntity y obtiene saleId.
+    - Inserta SaleItemEntity asociados.
+    - Descuenta stock de productos.
+    - Todo dentro de database.withTransaction (todo o nada).
+- Se agregó InsufficientStockException para señalar stock insuficiente.
+
+Resultado:
+Las ventas se guardan con consistencia y el inventario se actualiza automáticamente.
+
+### Bloque 2.4 – UI Nueva Venta (1 producto) + manejo de errores
+
+Se implementó una pantalla mínima para registrar ventas (MVP):
+
+- NewSaleViewModel:
+    - Observa lista de productos desde ProductRepository.
+    - Permite seleccionar producto y cargar cantidad.
+    - Llama a SalesRepository.registerSale() con un solo ítem.
+    - Maneja error InsufficientStockException mostrando mensaje.
+- NewSaleScreen:
+    - Dropdown de productos (ExposedDropdownMenuBox).
+    - Input de cantidad.
+    - Botón “Registrar venta” con estado isSaving.
+
+Resultado:
+Ya se puede registrar una venta real y verificar el descuento de stock.

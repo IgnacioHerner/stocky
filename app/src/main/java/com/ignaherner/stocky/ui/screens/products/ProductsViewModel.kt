@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 
 data class ProductsUiState(
     val products: List<ProductEntity> = emptyList(),
+    val lowStockProducts: List<ProductEntity> = emptyList(),
     val totalCost: Double = 0.0,
     val totalSaleValue: Double = 0.0
 )
@@ -28,6 +29,9 @@ class ProductsViewModel(
         ) { products, totalCost, totalSale ->
             ProductsUiState(
                 products = products,
+                lowStockProducts = products.filter {
+                    it.currentStock <= it.minimumStock
+                },
                 totalCost = totalCost,
                 totalSaleValue = totalSale
             )

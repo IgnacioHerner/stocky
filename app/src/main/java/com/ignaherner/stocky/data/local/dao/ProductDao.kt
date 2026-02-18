@@ -23,6 +23,14 @@ interface ProductDao {
     @Query("SELECT COALESCE(SUM(currentStock * salePrice), 0) FROM products")
     fun observeTotalSaleValue(): Flow<Double>
 
+    //Obtener un producto por id(para chequear el stock actual)
+    @Query("SELECT * FROM products WHERE id = :id LIMIT 1")
+    suspend fun getById(id: Long): ProductEntity?
+
+    // Actualizar stock
+    @Query("UPDATE products SET currentStock = :newStock WHERE id = :productId")
+    suspend fun updateStock(productId: Long, newStock: Int)
+
     // Inserta este producto en la base
     @Insert
     suspend fun insert(product: ProductEntity)

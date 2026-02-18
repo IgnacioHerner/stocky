@@ -37,6 +37,14 @@ fun ProductsScreen(
     var showFormDialog by rememberSaveable { mutableStateOf(false)}
     var editingProduct by rememberSaveable { mutableStateOf<ProductEntity?>(null)}
 
+    var showOnlyLowStock by rememberSaveable { mutableStateOf(false)}
+
+    val displayProducts = if(showOnlyLowStock){
+        state.lowStockProducts
+    } else {
+        state.products
+    }
+
     if (showFormDialog) {
         ProductFormDialog(
             initialProduct = editingProduct,
@@ -74,7 +82,11 @@ fun ProductsScreen(
 
 
     ProductsContent(
-        state = state,
+        products = displayProducts,
+        totalCost = state.totalCost,
+        totalSaleValue = state.totalSaleValue,
+        showOnlyLowStock = showOnlyLowStock,
+        onToggleFilter = { showOnlyLowStock = !showOnlyLowStock },
         onAddClick = {
             editingProduct = null
             showFormDialog = true
@@ -92,7 +104,11 @@ fun ProductsScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductsContent(
-    state: ProductsUiState,
+    products: List<ProductEntity>,
+    totalCost: Double,
+    totalSaleValue: Double,
+    showOnlyLowStock: Boolean,
+    onToggleFilter: () -> Unit,
     onAddClick: () -> Unit,
     onEdit: (ProductEntity) -> Unit,
     onDelete: (ProductEntity) -> Unit
@@ -114,24 +130,49 @@ fun ProductsContent(
                 .fillMaxSize()
         ) {
             MetricsCard(
-                totalCost = state.totalCost,
-                totalSaleValue = state.totalSaleValue
+                totalCost = totalCost,
+                totalSaleValue = totalSaleValue
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Productos", style = MaterialTheme.typography.titleMedium)
 
-            if(state.products.isEmpty()) {
+                TextButton(onClick = onToggleFilter) {
+                    Text(if (showOnlyLowStock) "Mostrar todos" else "Solo stock bajo")
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Productos")
+
+                TextButton(onClick = onToggleFilter) {
+                    Text(
+                        if (showOnlyLowStock) "Mostrar todos"
+                        else "Solo stock bajo"
+                    )
+                }
+            }
+
+            if(products.isEmpty()) {
                 Text("No hay productos todavia")
             } else {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(state.products) { product ->
+                    items(products) { product ->
                         ProductRow(
                             product = product,
                             onEdit = { onEdit(product)},
-                            onDelete = { onDelete(product) })
+                            onDelete = { onDelete(product) }
+                        )
                     }
                 }
             }
@@ -161,6 +202,8 @@ fun ProductRow(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val isLowStock = product.currentStock <= product.minimumStock
+
     Card(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
@@ -168,9 +211,13 @@ fun ProductRow(
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(product.name, style = MaterialTheme.typography.titleMedium)
-                Text("Stock: ${product.currentStock} | Min: ${product.minimumStock}")
+                Text(
+                    text = "Stock: ${product.currentStock} | Min: ${product.minimumStock}",
+                    color = if (isLowStock) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+                )
                 Text("Costo: ${product.cost} | Venta: ${product.salePrice}")
                 Text("Cat: ${product.category}")
             }
