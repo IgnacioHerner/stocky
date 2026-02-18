@@ -12,18 +12,26 @@ class SalesRepository(
 ) {
 
     private val saleDao = database.saleDao()
+    private val productDao = database.productDao()
 
     fun observeSalesWithItems(): Flow<List<SaleWithItems>> =
         saleDao.observeSalesWithItems()
 
-    suspend fun insertSaleWithItems(
+    /*
+    * Inserta venta + items y descuenta stock
+    * To_do atomico: si falla stock o cualquier paso, no se guarda nada
+    * */
+
+    suspend fun registerSale(
         date: Long,
-        total: Double,
         items: List<NewSaleItem>
     ) {
         database.withTransaction {
 
-            // 1) Insert Sale -> obtenemos id generado
+            // 1) Validar stock y cualquier stock dentro de transaccion (estado consistente)
+            val total = items.sumOf { it.unitPrice * it.quantity }
+
+            // 2) Insert sale y obtener saleId
             val saleId = saleDao.insertSale(
                 SaleEntity(
                     date = date,
@@ -31,8 +39,8 @@ class SalesRepository(
                 )
             )
 
-            // 2) Convertimos a entidades reales con saleId
-            val entities = items.map { item ->
+            // 3) Insert items
+            val saleItemsEntities = items.map { item ->
                 SaleItemEntity(
                     saleId = saleId,
                     productId = item.productId,
@@ -40,12 +48,28 @@ class SalesRepository(
                     unitPrice = item.unitPrice
                 )
             }
+            saleDao.insertSaleItems(saleItemsEntities)
 
-            // 3) Insert items
-            saleDao.insertSaleItems(entities)
+            // 4) Descontar stock (con validacion)
+            // Importante: si tiramos exception, Room revierte toda la transaccion
+            for(item in items) {
+                val product = productDao.getById(item.productId)
+                    ?: throw IllegalStateException("Producto ${item.productId} no existe")
+                val newStock = product.currentStock - item.quantity
+
+                if(newStock < 0 ) {
+                    throw InsufficientStockException(
+                        "Stock insuficiente para '${product.name}'. Disponible: ${product.currentStock}, requerido: ${item.quantity}"
+                    )
+                }
+
+                productDao.updateStock(productId = product.id, newStock = newStock)
+            }
         }
     }
 }
+
+class InsufficientStockException(message: String) : Exception(message)
 
 data class NewSaleItem (
     val productId: Long,

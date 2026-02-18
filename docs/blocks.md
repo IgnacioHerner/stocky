@@ -204,3 +204,20 @@ Se implementó SalesRepository para manejar operaciones compuestas del módulo V
 
 Resultado: la app puede persistir ventas con múltiples productos de forma atómica y escalable.
 
+### Bloque 2.3 – Registrar venta y descontar stock (transacción)
+
+Se implementó el caso de uso central del MVP: registrar una venta y actualizar stock de forma atómica.
+
+- Se agregaron métodos en ProductDao:
+    - getById(productId) para validar stock.
+    - updateStock(productId, newStock) para descontar existencias.
+- En SalesRepository se creó registerSale():
+    - Calcula total desde los ítems (unitPrice * quantity).
+    - Inserta SaleEntity y obtiene saleId.
+    - Inserta SaleItemEntity asociados.
+    - Descuenta stock de productos.
+    - Todo dentro de database.withTransaction (todo o nada).
+- Se agregó InsufficientStockException para señalar stock insuficiente.
+
+Resultado:
+Las ventas se guardan con consistencia y el inventario se actualiza automáticamente.

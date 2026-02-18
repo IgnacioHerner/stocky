@@ -104,3 +104,9 @@
 - Se usa database.withTransaction para atomicidad (todo o nada).
 - Se usa un modelo de entrada (NewSaleItem) para desacoplar la creación de ventas de las Entities.
 
+## Registrar venta (atomicidad y stock)
+
+- El registro de venta se implementa en SalesRepository (operación compuesta).
+- Se usa database.withTransaction para garantizar rollback si falla cualquier paso.
+- El total se calcula en Repository para no depender de la UI.
+- El stock se valida antes de aplicar el descuento y se lanza una excepción si es insuficiente.
