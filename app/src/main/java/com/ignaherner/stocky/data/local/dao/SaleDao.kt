@@ -15,6 +15,10 @@ interface SaleDao {
     @Query("SELECT * FROM sales ORDER BY date DESC")
     fun observeSalesWithItems(): Flow<List<SaleWithItems>>
 
+    @Transaction
+    @Query("SELECT * FROM sales WHERE date BETWEEN :from AND :to ORDER BY date DESC")
+    fun observeSalesWithItemsBetween(from: Long, to: Long): Flow<List<SaleWithItems>>
+
     @Insert
     suspend fun insertSale(sale: SaleEntity) : Long
 

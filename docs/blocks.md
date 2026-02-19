@@ -238,3 +238,58 @@ Se implementó una pantalla mínima para registrar ventas (MVP):
 
 Resultado:
 Ya se puede registrar una venta real y verificar el descuento de stock.
+
+### Bloque 2.5 – Nueva venta con carrito (múltiples productos) + total en vivo
+
+Se evolucionó la pantalla Nueva Venta para soportar múltiples productos por venta.
+
+- Se creó CartItemUi como modelo de UI para representar items del carrito.
+- NewSaleUiState ahora incluye:
+    - cart: lista de items
+    - total derivado (sumatoria de subtotales)
+- NewSaleViewModel agrega operaciones:
+    - addToCart(): agrega/actualiza cantidad si el producto ya existe en carrito
+    - removeFromCart(): elimina item del carrito
+    - registerSale(): registra venta usando todos los items del carrito
+- La UI:
+    - permite agregar productos al carrito
+    - muestra items, subtotales y total
+    - registra la venta completa
+
+Resultado: ya se pueden registrar ventas reales con múltiples productos.
+
+### Bloque 3.0 – Navigation Compose (base)
+
+Se incorporó Navigation Compose para navegar entre pantallas en Stocky.
+
+- Se agregaron rutas (Routes).
+- Se creó StockyNavGraph con NavHost y composable destinations.
+- ProductsScreen expone un callback onNewSaleClick para navegar sin acoplarse a NavController.
+- MainActivity aloja el NavHost y provee ViewModels mediante factories.
+
+Resultado: se puede probar NewSaleScreen y escalar a nuevas pantallas (historial, detalle, etc.).
+
+### Bloque 3.1 – Historial de ventas + filtro por fecha (base)
+
+Se implementó el módulo de historial:
+
+- SaleDao agrega query para obtener ventas entre fechas con sus items.
+- SalesRepository expone observeSalesBetween(from, to).
+- Se creó SalesHistoryViewModel y SalesHistoryUiState.
+- Se mapea SaleWithItems a un modelo de resumen (SaleSummaryUi).
+- Se creó SalesHistoryScreen para listar ventas (fecha, total, conteos).
+- Se agregó ruta de navegación a historial.
+
+Resultado: Stocky permite visualizar ventas registradas y sentar base para filtros por fecha.
+
+### Bloque 3.2 – Navegación completa entre pantallas
+
+Se completó la navegación entre pantallas principales:
+
+- Se agregó la ruta SALES_HISTORY.
+- StockyNavGraph define 3 destinos: Products, New Sale y Sales History.
+- Products muestra acciones en TopAppBar para navegar a Nueva venta y Ventas.
+- NewSaleScreen y SalesHistoryScreen agregan botón de back en TopAppBar usando popBackStack().
+- MainActivity provee los ViewModels necesarios al NavGraph.
+
+Resultado: el flujo de navegación del MVP queda funcional y listo para crecer.

@@ -5,6 +5,7 @@ import com.ignaherner.stocky.data.local.db.StockyDatabase
 import com.ignaherner.stocky.data.local.entity.SaleEntity
 import com.ignaherner.stocky.data.local.entity.SaleItemEntity
 import com.ignaherner.stocky.data.local.relation.SaleWithItems
+import com.ignaherner.stocky.data.repository.models.NewSaleItem
 import kotlinx.coroutines.flow.Flow
 
 class SalesRepository(
@@ -21,6 +22,9 @@ class SalesRepository(
     * Inserta venta + items y descuenta stock
     * To_do atomico: si falla stock o cualquier paso, no se guarda nada
     * */
+
+    fun observeSalesBetween(from: Long, to: Long): Flow<List<SaleWithItems>> =
+        saleDao.observeSalesWithItemsBetween(from, to)
 
     suspend fun registerSale(
         date: Long,
@@ -71,9 +75,4 @@ class SalesRepository(
 
 class InsufficientStockException(message: String) : Exception(message)
 
-data class NewSaleItem (
-    val productId: Long,
-    val quantity: Int,
-    val unitPrice: Double
-)
 

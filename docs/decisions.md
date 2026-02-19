@@ -117,3 +117,28 @@
 - La UI no calcula el total ni descuenta stock: delega al Repository.
 - Se captura InsufficientStockException para informar al usuario.
 - Navigation se pospone; se conecta temporalmente desde MainActivity para testear.
+
+## Carrito de venta (múltiples items)
+
+- Se modela el carrito con un modelo UI (CartItemUi) separado de Entities.
+- El carrito vive en el ViewModel para mantener consistencia y escalar.
+- El total se calcula como dato derivado (no se persiste).
+- registerSale delega al Repository para transacción + descuento de stock.
+
+## Navigation Compose
+
+- Se centraliza la navegación en un único NavHost en MainActivity.
+- Las pantallas no conocen NavController: solo emiten eventos (callbacks).
+- Rutas definidas en un objeto Routes para evitar strings hardcodeados.
+
+## Historial de ventas
+
+- El filtrado por fecha se realiza en DAO (query SQL) por performance.
+- Se usa un modelo UI (SaleSummaryUi) para desacoplar Entities de la UI.
+- La pantalla muestra un resumen por venta (fecha, total, cantidades).
+
+## Navegación
+
+- La navegación se centraliza en StockyNavGraph (único lugar con NavController).
+- Las pantallas reciben callbacks (onNewSaleClick, onSalesHistoryClick, onBack) para no acoplarse al NavController.
+- Se usa popBackStack() para back explícito en TopAppBar.
