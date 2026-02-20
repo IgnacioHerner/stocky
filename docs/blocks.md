@@ -299,3 +299,13 @@ Resultado: el flujo de navegación del MVP queda funcional y listo para crecer.
 Se corrigió la condición de renderizado en SalesHistoryScreen:
 - El if estaba invertido (isNotEmpty mostraba "No hay ventas").
 - Se cambió a isEmpty para mostrar el mensaje solo cuando no hay ventas.
+### Bloque 3.3 – Filtro por fecha en historial
+
+- Se implementó filtro por rango de fechas usando query SQL (BETWEEN) en SaleDao.
+- SalesHistoryViewModel maneja el rango (from/to) y observa cambios de forma reactiva (flatMapLatest).
+- En UI se agregaron DatePickers para seleccionar “Desde” y “Hasta”.
+- Para incluir el día completo, se normaliza:
+    - from = inicio del día
+    - to = fin del día
+
+Resultado: el historial permite filtrar ventas por fechas sin perder ventas del día por diferencias de hora.

@@ -142,3 +142,9 @@
 - La navegación se centraliza en StockyNavGraph (único lugar con NavController).
 - Las pantallas reciben callbacks (onNewSaleClick, onSalesHistoryClick, onBack) para no acoplarse al NavController.
 - Se usa popBackStack() para back explícito en TopAppBar.
+
+## Filtro por fecha
+
+- El filtrado se realiza en DAO (BETWEEN) por performance.
+- Se normalizan fechas a inicio/fin del día para evitar excluir ventas por hora.
+- El ViewModel usa un flujo de rango + flatMapLatest para cancelar observaciones anteriores automáticamente.

@@ -6,6 +6,8 @@ import com.ignaherner.stocky.data.repository.SalesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
@@ -17,62 +19,57 @@ data class SalesHistoryUiState(
     val message: String? = null
 )
 
+private data class DateRange(val from: Long, val to: Long)
+
+
 class SalesHistoryViewModel(
     private val salesRepository: SalesRepository
+
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SalesHistoryUiState())
     val uiState: StateFlow<SalesHistoryUiState> = _uiState
+
+    private val rangeFlow = MutableStateFlow<DateRange?>(null)
 
     init {
         val now = System.currentTimeMillis()
         val from = now - TimeUnit.DAYS.toMillis(30)
         val to = now
 
-        _uiState.update { it.copy(from = from, to = to) }
+        rangeFlow.value = DateRange(from, to)
 
-//        observeBetween(from, to)
-    }
-
-    init {
         viewModelScope.launch {
-            salesRepository.observeSalesWithItems().collectLatest { sales ->
-                val mapped = sales.map { saleWithItems ->
-                    val itemsCount = saleWithItems.items.size
-                    val productsCount = saleWithItems.items.sumOf { it.quantity }
+            rangeFlow
+                .filterNotNull()
+                .flatMapLatest { range ->  salesRepository.observeSalesBetween(range.from, range.to) }
+                .collectLatest { sales ->
+                    val mapped = sales.map { saleWithItems ->
+                        val itemsCount = saleWithItems.items.size
+                        val productsCount = saleWithItems.items.sumOf { it.quantity }
 
-                    SaleSummaryUi(
-                        id = saleWithItems.sale.id,
-                        date = saleWithItems.sale.date,
-                        total = saleWithItems.sale.total,
-                        itemsCount = itemsCount,
-                        productsCount = productsCount
-                    )
+                        SaleSummaryUi(
+                            id = saleWithItems.sale.id,
+                            date = saleWithItems.sale.date,
+                            total = saleWithItems.sale.total,
+                            itemsCount = itemsCount,
+                            productsCount = productsCount
+                        )
+                    }
+
+                    _uiState.update {
+                        it.copy(
+                            sales = mapped,
+                            from = rangeFlow.value!!.from,
+                            to = rangeFlow.value!!.to
+                        )
+                    }
                 }
-                _uiState.update { it.copy(sales = mapped) }
-            }
-        }
-    }
-
-    init {
-        viewModelScope.launch {
-            salesRepository.observeSalesCount().collectLatest { count ->
-                _uiState.update { it.copy(message = "sales count = $count") }
-
-            }
         }
 
-        viewModelScope.launch {
-            salesRepository.observeSales().collectLatest { sales ->
-                _uiState.update { it.copy(message = (it.message ?: "") + " | list size = ${sales.size}") }
-            }
-        }
-
-        // y mantené tu collector principal también, por ahora
     }
 
     fun applyFilter(from: Long, to: Long) {
-        _uiState.update { it.copy(from = from, to = to) }
-//        observeBetween(from, to)
+        rangeFlow.value = DateRange(from, to)
     }
 }
