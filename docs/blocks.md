@@ -293,3 +293,9 @@ Se completó la navegación entre pantallas principales:
 - MainActivity provee los ViewModels necesarios al NavGraph.
 
 Resultado: el flujo de navegación del MVP queda funcional y listo para crecer.
+
+### Fix – Historial no mostraba ventas
+
+Se corrigió la condición de renderizado en SalesHistoryScreen:
+- El if estaba invertido (isNotEmpty mostraba "No hay ventas").
+- Se cambió a isEmpty para mostrar el mensaje solo cuando no hay ventas.

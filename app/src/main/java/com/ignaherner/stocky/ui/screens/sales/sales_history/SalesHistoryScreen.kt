@@ -35,6 +35,7 @@ fun SalesHistoryScreen(
 
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
+
     Scaffold(
         topBar = { TopAppBar(
             title = { Text("Historial de ventas") },
@@ -49,10 +50,12 @@ fun SalesHistoryScreen(
             modifier = Modifier.padding(padding).padding(16.dp).fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (state.sales.isNotEmpty()){
+
+            if (state.sales.isEmpty()){
                 Text("No hay ventas en este rango.")
             } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxSize()) {
                     items(state.sales) { sale ->
                         SaleSummaryCard(sale)
                     }

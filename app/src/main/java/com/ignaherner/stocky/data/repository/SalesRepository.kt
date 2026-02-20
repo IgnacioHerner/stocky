@@ -23,8 +23,8 @@ class SalesRepository(
     * To_do atomico: si falla stock o cualquier paso, no se guarda nada
     * */
 
-    fun observeSalesBetween(from: Long, to: Long): Flow<List<SaleWithItems>> =
-        saleDao.observeSalesWithItemsBetween(from, to)
+//    fun observeSalesBetween(from: Long, to: Long): Flow<List<SaleWithItems>> =
+//        saleDao.observeSalesWithItemsBetween(from, to)
 
     suspend fun registerSale(
         date: Long,

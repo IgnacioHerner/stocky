@@ -72,7 +72,6 @@ fun NewSaleScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-
             Button(
                 onClick = viewModel::addToCart,
                 enabled = !state.isSaving && state.products.isNotEmpty(),
@@ -148,6 +147,7 @@ fun ProductDropdown(
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)},
             modifier = Modifier
                 .fillMaxWidth()
+                .menuAnchor()
         )
 
         ExposedDropdownMenu(
@@ -166,3 +166,4 @@ fun ProductDropdown(
         }
     }
 }
+

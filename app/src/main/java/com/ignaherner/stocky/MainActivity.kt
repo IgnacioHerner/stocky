@@ -40,10 +40,13 @@ class MainActivity : ComponentActivity() {
 
         val productsViewModel: ProductsViewModel =
             ViewModelProvider(this, productsFactory)[ProductsViewModel::class.java]
+
         val newSaleViewModel: NewSaleViewModel =
             ViewModelProvider(this, newSaleFactory)[NewSaleViewModel::class.java]
-        val salesHistoryViewModel: SalesHistoryViewModel =
+
+        val salesHistoryViewModel =
             ViewModelProvider(this, salesHistoryFactory)[SalesHistoryViewModel::class.java]
+
 
         // 4) Seteamos Compose + NavController + NavGraph
         setContent {

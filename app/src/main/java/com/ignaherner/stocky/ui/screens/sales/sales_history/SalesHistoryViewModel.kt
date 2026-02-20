@@ -31,12 +31,12 @@ class SalesHistoryViewModel(
 
         _uiState.update { it.copy(from = from, to = to) }
 
-        observeBetween(from, to)
+//        observeBetween(from, to)
     }
 
-    private fun observeBetween(from: Long, to: Long) {
+    init {
         viewModelScope.launch {
-            salesRepository.observeSalesBetween(from, to).collectLatest { sales ->
+            salesRepository.observeSalesWithItems().collectLatest { sales ->
                 val mapped = sales.map { saleWithItems ->
                     val itemsCount = saleWithItems.items.size
                     val productsCount = saleWithItems.items.sumOf { it.quantity }
@@ -49,14 +49,30 @@ class SalesHistoryViewModel(
                         productsCount = productsCount
                     )
                 }
-
                 _uiState.update { it.copy(sales = mapped) }
             }
         }
     }
 
+    init {
+        viewModelScope.launch {
+            salesRepository.observeSalesCount().collectLatest { count ->
+                _uiState.update { it.copy(message = "sales count = $count") }
+
+            }
+        }
+
+        viewModelScope.launch {
+            salesRepository.observeSales().collectLatest { sales ->
+                _uiState.update { it.copy(message = (it.message ?: "") + " | list size = ${sales.size}") }
+            }
+        }
+
+        // y mantené tu collector principal también, por ahora
+    }
+
     fun applyFilter(from: Long, to: Long) {
         _uiState.update { it.copy(from = from, to = to) }
-        observeBetween(from, to)
+//        observeBetween(from, to)
     }
 }
