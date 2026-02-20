@@ -73,7 +73,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
 
     // --- NUEVO: Navigation Compose ---
-    implementation("androidx.navigation:navigation-compose:2.9.7")
+    implementation("androidx.navigation:navigation-compose:2.8.5")
 
     // --- NUEVO: Room (DB local) ---
     implementation("androidx.room:room-runtime:2.8.1")

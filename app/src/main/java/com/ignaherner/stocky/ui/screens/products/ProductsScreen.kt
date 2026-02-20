@@ -30,7 +30,9 @@ import com.ignaherner.stocky.data.local.entity.ProductEntity
 
 @Composable
 fun ProductsScreen(
-    viewModel: ProductsViewModel
+    viewModel: ProductsViewModel,
+    onNewSaleClick: () -> Unit,
+    onSalesHistoryClick: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -85,6 +87,8 @@ fun ProductsScreen(
         products = displayProducts,
         totalCost = state.totalCost,
         totalSaleValue = state.totalSaleValue,
+        onNewSaleClick = onNewSaleClick,
+        onSalesHistoryClick = onSalesHistoryClick,
         showOnlyLowStock = showOnlyLowStock,
         onToggleFilter = { showOnlyLowStock = !showOnlyLowStock },
         onAddClick = {
@@ -111,11 +115,19 @@ fun ProductsContent(
     onToggleFilter: () -> Unit,
     onAddClick: () -> Unit,
     onEdit: (ProductEntity) -> Unit,
-    onDelete: (ProductEntity) -> Unit
+    onDelete: (ProductEntity) -> Unit,
+    onNewSaleClick: () -> Unit,
+    onSalesHistoryClick: () -> Unit
 )   {
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("Stocky - Products") })
+            TopAppBar(
+                title = { Text("Stocky - Products") },
+                actions = {
+                    TextButton(onClick = onSalesHistoryClick) { Text("Historial")}
+                    TextButton(onClick = onNewSaleClick) { Text("Nueva venta")}
+                }
+            )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddClick) {
@@ -140,9 +152,6 @@ fun ProductsContent(
             ) {
                 Text("Productos", style = MaterialTheme.typography.titleMedium)
 
-                TextButton(onClick = onToggleFilter) {
-                    Text(if (showOnlyLowStock) "Mostrar todos" else "Solo stock bajo")
-                }
             }
             Spacer(modifier = Modifier.height(8.dp))
 
