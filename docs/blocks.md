@@ -309,3 +309,17 @@ Se corrigió la condición de renderizado en SalesHistoryScreen:
     - to = fin del día
 
 Resultado: el historial permite filtrar ventas por fechas sin perder ventas del día por diferencias de hora.
+
+
+### Bloque 3.4 – Detalle de venta + eliminar con restauración de stock
+
+- Se agregó navegación a detalle de venta con argumento saleId.
+- SaleDao incorpora query para observar SaleWithItems por id.
+- Se creó SaleDetailViewModel (parametrizado por saleId) y su Factory.
+- Se implementó deleteSaleAndRestoreStock en SalesRepository con transacción:
+    - obtiene items
+    - restaura stock
+    - borra items y sale
+- SaleDetailScreen muestra información de venta e items, y permite eliminar.
+
+Resultado: se puede corregir una venta errónea sin romper consistencia del inventario.

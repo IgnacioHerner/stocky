@@ -2,19 +2,27 @@ package com.ignaherner.stocky.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.ignaherner.stocky.ui.screens.products.ProductsScreen
+import com.ignaherner.stocky.ui.screens.products.ProductsViewModel
 import com.ignaherner.stocky.ui.screens.sales.NewSaleScreen
+import com.ignaherner.stocky.ui.screens.sales.NewSaleViewModel
+import com.ignaherner.stocky.ui.screens.sales.sale_detail.SaleDetailScreen
+import com.ignaherner.stocky.ui.screens.sales.sale_detail.SaleDetailViewModel
 import com.ignaherner.stocky.ui.screens.sales.sales_history.SalesHistoryScreen
+import com.ignaherner.stocky.ui.screens.sales.sales_history.SalesHistoryViewModel
 
 @Composable
 fun StockyNavGraph(
     navController: NavHostController,
-    productsViewModelProvider: @Composable () -> com.ignaherner.stocky.ui.screens.products.ProductsViewModel,
-    newSaleViewModelProvider: @Composable () -> com.ignaherner.stocky.ui.screens.sales.NewSaleViewModel,
-    salesHistoryModelProvider: @Composable () -> com.ignaherner.stocky.ui.screens.sales.sales_history.SalesHistoryViewModel,
+    productsViewModelProvider: @Composable () -> ProductsViewModel,
+    newSaleViewModelProvider: @Composable () -> NewSaleViewModel,
+    salesHistoryModelProvider: @Composable () -> SalesHistoryViewModel,
+    saleDetailFactoryProvider: (Long) -> androidx.lifecycle.ViewModelProvider.Factory,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -40,7 +48,25 @@ fun StockyNavGraph(
         composable (Routes.SALES_HISTORY){
             SalesHistoryScreen(
                 viewModel = salesHistoryModelProvider(),
-                onBack = { navController.popBackStack()}
+                onBack = { navController.popBackStack() },
+                onSaleClick = { saleId ->
+                    navController.navigate(Routes.saleDetail(saleId))
+                }
+            )
+        }
+
+        composable(Routes.SALE_DETAIL) { backStackEntry ->
+            val saleId = backStackEntry.arguments
+                ?.getString("saleId")
+                ?.toLongOrNull() ?: return@composable
+
+            val factory = saleDetailFactoryProvider(saleId)
+
+            val viewModel = ViewModelProvider(backStackEntry, factory)[SaleDetailViewModel::class.java]
+
+            SaleDetailScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() }
             )
         }
     }

@@ -1,5 +1,6 @@
 package com.ignaherner.stocky.ui.screens.sales.sales_history
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,33 +36,52 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
 
-private fun startDay(millis: Long) : Long {
-    val cal = java.util.Calendar.getInstance().apply { timeInMillis = millis }
-    cal.set(java.util.Calendar.HOUR_OF_DAY,0)
-    cal.set(java.util.Calendar.MINUTE,0)
-    cal.set(java.util.Calendar.SECOND,0)
-    cal.set(java.util.Calendar.MILLISECOND,0)
-    return cal.timeInMillis
+private fun startOfLocalDayFromPicker(selectedDateMillis: Long): Long {
+    val localDate = selectedMillisToLocalDate(selectedDateMillis)
+    return localDate
+        .atStartOfDay(ZoneId.systemDefault())
+        .toInstant()
+        .toEpochMilli()
 }
 
-private fun endOfDay(millis: Long) : Long {
-    val cal = java.util.Calendar.getInstance().apply { timeInMillis = millis }
-    cal.set(java.util.Calendar.HOUR_OF_DAY,0)
-    cal.set(java.util.Calendar.MINUTE,0)
-    cal.set(java.util.Calendar.SECOND,0)
-    cal.set(java.util.Calendar.MILLISECOND,0)
-    return cal.timeInMillis
+private fun endOfLocalDayFromPicker(selectedDateMillis: Long): Long {
+    val localDate = selectedMillisToLocalDate(selectedDateMillis)
+    return localDate
+        .plusDays(1)
+        .atStartOfDay(ZoneId.systemDefault())
+        .toInstant()
+        .toEpochMilli() - 1
+}
+
+private val dayFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
+private fun selectedMillisToLocalDate(selectedDateMillis: Long) : LocalDate {
+    return Instant.ofEpochMilli(selectedDateMillis)
+        .atZone(ZoneOffset.UTC)
+        .toLocalDate()
+}
+
+private fun formatSelectedDate(selectedDateMillis: Long) : String {
+    val date = selectedMillisToLocalDate(selectedDateMillis)
+    return date.format(dayFormatter)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SalesHistoryScreen(
     viewModel: SalesHistoryViewModel,
-    onBack: () -> Unit) {
+    onBack: () -> Unit,
+    onSaleClick: (Long) -> Unit
+) {
 
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -86,8 +106,8 @@ fun SalesHistoryScreen(
                 to = state.to,
                 onApply = {fromMillis, toMillis ->
                     viewModel.applyFilter(
-                        from = startDay(fromMillis),
-                        to = endOfDay(toMillis)
+                        from = startOfLocalDayFromPicker(fromMillis),
+                        to = endOfLocalDayFromPicker(toMillis)
                     )
                 }
             )
@@ -98,7 +118,10 @@ fun SalesHistoryScreen(
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxSize()) {
                     items(state.sales) { sale ->
-                        SaleSummaryCard(sale)
+                        SaleSummaryCard(
+                            sale = sale,
+                            onClick = {onSaleClick(sale.id)}
+                        )
                     }
                 }
             }
@@ -131,12 +154,22 @@ fun FilterRow(
         OutlinedButton(
             onClick = {showFromPicker = true},
             modifier = Modifier.weight(1f)
-        ) { Text("Desde")}
+        ) {
+            Text(
+                text = "Desde\n${formatSelectedDate(selectedFrom)}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
 
         OutlinedButton(
             onClick = {showToPicker = true},
             modifier = Modifier.weight(1f)
-        ) { Text("Hasta")}
+        ) {
+            Text(
+                text = "Hasta\n${formatSelectedDate(selectedTo)}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
 
         Button(onClick = {onApply(selectedFrom, selectedTo) }) {
             Text("Aplicar")
@@ -173,11 +206,18 @@ fun FilterRow(
 }
 
 @Composable
-fun SaleSummaryCard(sale: SaleSummaryUi) {
+fun SaleSummaryCard(
+    sale: SaleSummaryUi,
+    onClick: () -> Unit
+) {
     val formatter = remember { SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()) }
     val dateText = formatter.format(Date(sale.date))
 
-    Card(modifier = Modifier.fillMaxWidth()) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable{ onClick() }
+    ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(dateText, style = MaterialTheme.typography.titleMedium)
             Text("Total: ${sale.total} ARS")

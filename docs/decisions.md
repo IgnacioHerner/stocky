@@ -148,3 +148,9 @@
 - El filtrado se realiza en DAO (BETWEEN) por performance.
 - Se normalizan fechas a inicio/fin del día para evitar excluir ventas por hora.
 - El ViewModel usa un flujo de rango + flatMapLatest para cancelar observaciones anteriores automáticamente.
+
+## Eliminar venta con consistencia
+
+- Se restaura stock al eliminar una venta para mantener inventario correcto.
+- La operación se hace dentro de withTransaction (atomicidad).
+- SaleDetailViewModel es parametrizado por saleId, por eso requiere Factory con parámetro.

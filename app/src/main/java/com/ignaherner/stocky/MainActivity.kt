@@ -12,6 +12,8 @@ import com.ignaherner.stocky.ui.screens.products.ProductsViewModelFactory
 import com.ignaherner.stocky.ui.screens.sales.NewSaleScreen
 import com.ignaherner.stocky.ui.screens.sales.NewSaleViewModel
 import com.ignaherner.stocky.ui.screens.sales.NewSaleViewModelFactory
+import com.ignaherner.stocky.ui.screens.sales.sale_detail.SaleDetailViewModel
+import com.ignaherner.stocky.ui.screens.sales.sale_detail.SaleDetailViewModelFactory
 import com.ignaherner.stocky.ui.screens.sales.sales_history.SalesHistoryViewModel
 import com.ignaherner.stocky.ui.screens.sales.sales_history.SalesHistoryViewModelFactory
 import com.ignaherner.stocky.ui.theme.StockyTheme
@@ -47,6 +49,10 @@ class MainActivity : ComponentActivity() {
         val salesHistoryViewModel =
             ViewModelProvider(this, salesHistoryFactory)[SalesHistoryViewModel::class.java]
 
+        val saleDetailFactoryProvider: (Long) -> ViewModelProvider.Factory = { saleId ->
+            SaleDetailViewModelFactory(saleId, container.salesRepository)
+        }
+
 
         // 4) Seteamos Compose + NavController + NavGraph
         setContent {
@@ -60,7 +66,8 @@ class MainActivity : ComponentActivity() {
                     navController = navController,
                     productsViewModelProvider = {productsViewModel},
                     newSaleViewModelProvider = {newSaleViewModel},
-                    salesHistoryModelProvider = {salesHistoryViewModel}
+                    salesHistoryModelProvider = {salesHistoryViewModel},
+                    saleDetailFactoryProvider = saleDetailFactoryProvider
                 )
             }
         }
