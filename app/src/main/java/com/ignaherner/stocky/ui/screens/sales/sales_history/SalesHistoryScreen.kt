@@ -102,8 +102,8 @@ fun SalesHistoryScreen(
         ) {
 
             FilterRow(
-                from = state.from,
-                to = state.to,
+                from = state.fromSelected,
+                to = state.toSelected,
                 onApply = {fromMillis, toMillis ->
                     viewModel.applyFilter(
                         from = startOfLocalDayFromPicker(fromMillis),

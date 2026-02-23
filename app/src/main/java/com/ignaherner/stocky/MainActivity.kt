@@ -50,7 +50,8 @@ class MainActivity : ComponentActivity() {
             ViewModelProvider(this, salesHistoryFactory)[SalesHistoryViewModel::class.java]
 
         val saleDetailFactoryProvider: (Long) -> ViewModelProvider.Factory = { saleId ->
-            SaleDetailViewModelFactory(saleId, container.salesRepository)
+            SaleDetailViewModelFactory(
+                saleId, container.salesRepository, container.productRepository)
         }
 
 

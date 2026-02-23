@@ -2,16 +2,19 @@ package com.ignaherner.stocky.ui.screens.sales.sale_detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ignaherner.stocky.data.repository.ProductRepository
 import com.ignaherner.stocky.data.repository.SalesRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class SaleDetailViewModel(
     private val saleId: Long,
-    private val salesRepository: SalesRepository
+    private val salesRepository: SalesRepository,
+    private val productRepository: ProductRepository
 ) : ViewModel(){
 
     private val _uiState = MutableStateFlow(SaleDetailUiState())
@@ -19,16 +22,32 @@ class SaleDetailViewModel(
 
     init {
         viewModelScope.launch {
-            salesRepository.observeSaleWithItems(saleId).collectLatest { saleWithItems ->
-                _uiState.update {
-                    it.copy(
-                        sale = saleWithItems?.sale,
-                        items = saleWithItems?.items ?: emptyList()
+            combine(
+                salesRepository.observeSaleWithItems(saleId),
+                productRepository.observeProducts()
+            ) { saleWithItems, products ->
+
+                val nameById = products.associateBy({ it.id }, { it.name })
+
+                val itemsUi = (saleWithItems?.items ?: emptyList()).map { item ->
+                    SaleItemDetailUi(
+                        productId = item.productId,
+                        productName = nameById[item.productId] ?: "Producto eliminado",
+                        quantity = item.quantity,
+                        unitPrice = item.unitPrice
                     )
                 }
+
+                SaleDetailUiState(
+                    sale = saleWithItems?.sale,
+                    itemsUi = itemsUi
+                )
+            }.collectLatest { newState ->
+                _uiState.value = newState
             }
         }
     }
+
 
     fun clearMessage() {
         _uiState.update { it.copy(message  = null) }

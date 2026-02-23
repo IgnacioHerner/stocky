@@ -2,13 +2,16 @@ package com.ignaherner.stocky.ui.screens.sales.sale_detail
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
@@ -19,9 +22,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -38,6 +43,7 @@ fun SaleDetailScreen(
     onBack: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -77,24 +83,47 @@ fun SaleDetailScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.weight(1f, fill = true)
             ) {
-                items(state.items) { item ->
+                items(state.itemsUi) { item ->
                     Card(modifier = Modifier.fillMaxWidth()) {
                         Column(modifier = Modifier.padding(12.dp)) {
-                            Text("ProductoId: ${item.productId}")
-                            Text("Cantidad: ${item.quantity}")
-                            Text("Precio unit: ${item.unitPrice}")
-                            Text("Subtotal: ${item.quantity * item.unitPrice}")
+                            Text(item.productName, style = MaterialTheme.typography.titleMedium)
+                            Spacer(Modifier.height(4.dp))
+                            Text("Cant: ${item.quantity}  •  Unit: ${item.unitPrice}")
+                            Text("Subtotal: ${item.subtotal}")
                         }
                     }
                 }
             }
 
             Button(
-                onClick = viewModel::deleteSale,
+                onClick = {showDeleteDialog = true},
                 enabled = !state.isDeleting,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(if (state.isDeleting) "Eliminando..." else "Eliminar venta")
+            }
+
+            if(showDeleteDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDeleteDialog = false},
+                    title = { Text("Confirmar eliminación")},
+                    text = { Text("¿Estás seguro que quéres eliminar esta venta? Esta accion restaurará el stock.")},
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                showDeleteDialog = false
+                                viewModel.deleteSale()
+                            }
+                        ) {
+                            Text("Eliminar")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = {showDeleteDialog = false}) {
+                            Text("Cancelar")
+                        }
+                    }
+                )
             }
 
             state.message?.let { msg ->

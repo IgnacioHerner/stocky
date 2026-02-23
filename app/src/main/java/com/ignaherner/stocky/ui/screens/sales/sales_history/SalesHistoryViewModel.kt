@@ -14,8 +14,8 @@ import java.util.concurrent.TimeUnit
 
 data class SalesHistoryUiState(
     val sales: List<SaleSummaryUi> = emptyList(),
-    val from: Long? = null,
-    val to: Long? = null,
+    val fromSelected: Long? = null,
+    val toSelected: Long? = null,
     val message: String? = null
 )
 
@@ -60,8 +60,8 @@ class SalesHistoryViewModel(
                     _uiState.update {
                         it.copy(
                             sales = mapped,
-                            from = rangeFlow.value!!.from,
-                            to = rangeFlow.value!!.to
+                            fromSelected = rangeFlow.value!!.from,
+                            toSelected = rangeFlow.value!!.to
                         )
                     }
                 }

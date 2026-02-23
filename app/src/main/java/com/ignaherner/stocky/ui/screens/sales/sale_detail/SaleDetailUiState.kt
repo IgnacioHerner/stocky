@@ -5,7 +5,7 @@ import com.ignaherner.stocky.data.local.entity.SaleItemEntity
 
 data class SaleDetailUiState(
     val sale: SaleEntity? = null,
-    val items: List<SaleItemEntity> = emptyList(),
+    val itemsUi: List<SaleItemDetailUi> = emptyList(),
     val isDeleting: Boolean = false,
     val message: String? = null
 )
