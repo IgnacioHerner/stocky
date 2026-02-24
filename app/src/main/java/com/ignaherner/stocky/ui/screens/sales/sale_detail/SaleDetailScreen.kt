@@ -74,6 +74,10 @@ fun SaleDetailScreen(
             val formatter = remember { SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()) }
             Text("Fecha: ${formatter.format(Date(sale.date))}", style = MaterialTheme.typography.titleMedium)
             Text("Total: ${sale.total} ARS")
+            Text(
+                text = "Ganancia: ${"%.2f".format(state.totalProfit)} ARS",
+                style = MaterialTheme.typography.titleMedium
+            )
 
             HorizontalDivider()
 
@@ -90,6 +94,7 @@ fun SaleDetailScreen(
                             Spacer(Modifier.height(4.dp))
                             Text("Cant: ${item.quantity}  •  Unit: ${item.unitPrice}")
                             Text("Subtotal: ${item.subtotal}")
+                            Text("Ganancia item: ${"%.2f".format(item.profit)}")
                         }
                     }
                 }

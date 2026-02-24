@@ -28,19 +28,24 @@ class SaleDetailViewModel(
             ) { saleWithItems, products ->
 
                 val nameById = products.associateBy({ it.id }, { it.name })
+                val costById = products.associateBy({it.id}, {it.cost})
 
                 val itemsUi = (saleWithItems?.items ?: emptyList()).map { item ->
                     SaleItemDetailUi(
                         productId = item.productId,
                         productName = nameById[item.productId] ?: "Producto eliminado",
                         quantity = item.quantity,
-                        unitPrice = item.unitPrice
+                        unitPrice = item.unitPrice,
+                        unitCost = costById[item.productId] ?: 0.0
                     )
                 }
 
+                val totalProfit = itemsUi.sumOf { it.profit }
+
                 SaleDetailUiState(
                     sale = saleWithItems?.sale,
-                    itemsUi = itemsUi
+                    itemsUi = itemsUi,
+                    totalProfit = totalProfit
                 )
             }.collectLatest { newState ->
                 _uiState.value = newState

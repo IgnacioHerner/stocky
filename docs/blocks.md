@@ -323,3 +323,46 @@ Resultado: el historial permite filtrar ventas por fechas sin perder ventas del 
 - SaleDetailScreen muestra información de venta e items, y permite eliminar.
 
 Resultado: se puede corregir una venta errónea sin romper consistencia del inventario.
+
+### Bloque 3.5 – Mostrar nombre del producto en el detalle de venta
+
+Objetivo:
+Reemplazar la visualización de productId en SaleDetailScreen por el nombre real del producto.
+
+Problema:
+SaleItemEntity solo contiene productId, quantity y unitPrice.
+La UI mostraba información técnica (ID) en lugar de información útil para el usuario.
+
+Solución implementada:
+
+- Se creó el modelo de UI `SaleItemDetailUi`:
+    - productId
+    - productName
+    - quantity
+    - unitPrice
+    - subtotal (calculado)
+
+- Se modificó `SaleDetailUiState` para exponer `itemsUi` en vez de `SaleItemEntity`.
+
+- En `SaleDetailViewModel`:
+    - Se combinaron los flows:
+        - observeSaleWithItems(saleId)
+        - observeProducts()
+    - Se creó un mapa id → name usando associateBy.
+    - Se transformaron los SaleItemEntity en SaleItemDetailUi.
+
+- Se actualizó `SaleDetailScreen` para renderizar:
+    - Nombre del producto
+    - Cantidad
+    - Precio unitario
+    - Subtotal
+
+Resultado:
+El detalle de venta ahora muestra información comprensible y profesional.
+La UI ya no depende de IDs técnicos.
+
+### Bloque 3.6 – Confirm dialog antes de eliminar venta
+
+- Se agregó un AlertDialog en SaleDetailScreen.
+- El usuario debe confirmar antes de ejecutar deleteSale().
+- Mejora UX y evita eliminación accidental.

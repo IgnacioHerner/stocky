@@ -154,3 +154,34 @@
 - Se restaura stock al eliminar una venta para mantener inventario correcto.
 - La operación se hace dentro de withTransaction (atomicidad).
 - SaleDetailViewModel es parametrizado por saleId, por eso requiere Factory con parámetro.
+
+## Modelado de datos en UI (Bloque 3.5)
+
+Decisión:
+La UI no debe trabajar con entidades de base de datos directamente.
+
+Motivo:
+- Las entidades reflejan estructura de almacenamiento.
+- La UI necesita información lista para mostrar.
+- Evita que la UI haga lógica de transformación o joins.
+
+Implementación:
+- Se creó un modelo intermedio (SaleItemDetailUi).
+- El ViewModel transforma datos de dominio a modelo de presentación.
+- Se usa combine para sincronizar venta + productos.
+
+Beneficios:
+- Separación clara entre capa de datos y capa de presentación.
+- UI más simple.
+- Código más mantenible.
+- Facilita futuras mejoras (ej: agregar categoría, imagen, etc.).
+
+Principio aplicado:
+"El ViewModel adapta los datos para la UI, la UI solo renderiza."
+
+
+## Confirmación de eliminación
+
+- Se agregó confirmación antes de borrar una venta.
+- La restauración de stock sigue siendo transaccional en repository.
+- Se decidió manejar el diálogo como estado local de UI.
