@@ -3,11 +3,11 @@ package com.ignaherner.stocky.ui.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.ignaherner.stocky.ui.screens.home.HomeScreen
+import com.ignaherner.stocky.ui.screens.home.HomeViewModel
 import com.ignaherner.stocky.ui.screens.products.ProductsScreen
 import com.ignaherner.stocky.ui.screens.products.ProductsViewModel
 import com.ignaherner.stocky.ui.screens.sales.NewSaleScreen
@@ -23,7 +23,8 @@ fun StockyNavGraph(
     productsViewModelProvider: @Composable () -> ProductsViewModel,
     newSaleViewModelProvider: @Composable () -> NewSaleViewModel,
     salesHistoryModelProvider: @Composable () -> SalesHistoryViewModel,
-    saleDetailFactoryProvider: (Long) -> androidx.lifecycle.ViewModelProvider.Factory,
+    saleDetailFactoryProvider: (Long) -> ViewModelProvider.Factory,
+    homeViewModelProvider: @Composable () -> HomeViewModel,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -33,6 +34,7 @@ fun StockyNavGraph(
     ) {
         composable (Routes.HOME) {
             HomeScreen(
+                viewModel = homeViewModelProvider(),
                 onProductsClick = {navController.navigate(Routes.PRODUCTS)},
                 onSalesClick = {navController.navigate(Routes.SALES_HISTORY)}
             )

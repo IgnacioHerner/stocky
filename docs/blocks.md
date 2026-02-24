@@ -367,7 +367,7 @@ La UI ya no depende de IDs técnicos.
 - El usuario debe confirmar antes de ejecutar deleteSale().
 - Mejora UX y evita eliminación accidental.
 - 
-### Bloque 3.8.1 – Home como pantalla inicial
+### Bloque 3.8 – Home como pantalla inicial
 
 - Se agregó la ruta HOME y se configuró como startDestination del NavHost.
 - Se creó HomeScreen (placeholder) con dos acciones:
@@ -376,4 +376,21 @@ La UI ya no depende de IDs técnicos.
 - La navegación se mantiene centralizada en StockyNavGraph mediante callbacks.
 
 Resultado: la app ahora inicia en un Home Dashboard (base) y permite entrar a los módulos principales.
+
+### Bloque 3.8.1 – Home Dashboard con ConstraintLayout (Compose)
+
+- Se creó la pantalla Home como dashboard inicial del MVP.
+- Se incorporó HomeViewModel + HomeUiState para calcular métricas reales:
+    - Inventario valuado a costo (cost * stock)
+    - Inventario valuado a venta (salePrice * stock)
+    - Stock bajo (stock <= mínimo)
+    - Ganancia histórica (sumatoria de (unitPrice - cost) * quantity)
+- Se implementó el layout del Home con ConstraintLayout Compose:
+    - 2 cards arriba (costo/venta)
+    - 1 card abajo ocupando ancho completo (ganancia)
+    - 2 cards de acciones (Productos/Ventas)
+- Navegación desde Home por callbacks, centralizada en StockyNavGraph.
+
+Resultado: el MVP inicia en un dashboard visual y útil, listo para demo y publicación.
+
 

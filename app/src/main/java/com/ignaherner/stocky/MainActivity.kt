@@ -6,6 +6,8 @@ import androidx.activity.compose.setContent
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.rememberNavController
 import com.ignaherner.stocky.ui.navigation.StockyNavGraph
+import com.ignaherner.stocky.ui.screens.home.HomeViewModel
+import com.ignaherner.stocky.ui.screens.home.HomeViewModelFactory
 import com.ignaherner.stocky.ui.screens.products.ProductsScreen
 import com.ignaherner.stocky.ui.screens.products.ProductsViewModel
 import com.ignaherner.stocky.ui.screens.products.ProductsViewModelFactory
@@ -35,6 +37,11 @@ class MainActivity : ComponentActivity() {
             salesRepository = container.salesRepository
         )
 
+        val homeFactory = HomeViewModelFactory(
+            productRepository = app.container.productRepository,
+            salesRepository = app.container.salesRepository
+        )
+
         val salesHistoryFactory = SalesHistoryViewModelFactory(container.salesRepository)
 
         // 3) Creamos la instancias de ViewModel con ViewModelProvider
@@ -54,6 +61,8 @@ class MainActivity : ComponentActivity() {
                 saleId, container.salesRepository, container.productRepository)
         }
 
+        val homeViewModel: HomeViewModel =
+            ViewModelProvider(this, homeFactory)[HomeViewModel::class.java]
 
         // 4) Seteamos Compose + NavController + NavGraph
         setContent {
@@ -68,7 +77,8 @@ class MainActivity : ComponentActivity() {
                     productsViewModelProvider = {productsViewModel},
                     newSaleViewModelProvider = {newSaleViewModel},
                     salesHistoryModelProvider = {salesHistoryViewModel},
-                    saleDetailFactoryProvider = saleDetailFactoryProvider
+                    saleDetailFactoryProvider = saleDetailFactoryProvider,
+                    homeViewModelProvider = {homeViewModel}
                 )
             }
         }

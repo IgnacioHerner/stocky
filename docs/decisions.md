@@ -191,3 +191,14 @@ Principio aplicado:
 - Se decidió incorporar una pantalla Home para que el MVP tenga una entrada clara tipo dashboard.
 - Home no maneja NavController: recibe callbacks para mantener desacoplamiento.
 - Se prioriza primero navegación funcional (placeholder) y luego UI/metrics en los próximos bloques.
+
+## Home Dashboard
+
+- Se decidió agregar un Home como startDestination para que el MVP tenga una entrada clara tipo app real.
+- Las métricas se calculan en HomeViewModel (no en UI) para respetar separación de responsabilidades.
+- Se usa combine(products, sales) para actualizar el dashboard de forma reactiva.
+- Layout hecho con ConstraintLayout Compose para practicar constraints sin XML y mantener un diseño adaptable.
+- Ganancia del MVP se calcula de forma histórica usando:
+    - unitPrice guardado en el item (precio real al momento de la venta)
+    - cost actual del producto (simplificación aceptable para MVP).
+
