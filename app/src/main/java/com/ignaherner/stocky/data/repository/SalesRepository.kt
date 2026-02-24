@@ -48,11 +48,15 @@ class SalesRepository(
 
             // 3) Insert items
             val saleItemsEntities = items.map { item ->
+                val product = productDao.getById(item.productId)
+                    ?:throw java.lang.IllegalStateException("Producto no encontrado: ${item.productId}")
                 SaleItemEntity(
                     saleId = saleId,
                     productId = item.productId,
                     quantity = item.quantity,
-                    unitPrice = item.unitPrice
+                    unitPrice = item.unitPrice,
+                    unitCost = product.cost
+
                 )
             }
             saleDao.insertSaleItems(saleItemsEntities)
