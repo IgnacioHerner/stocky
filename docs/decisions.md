@@ -185,3 +185,9 @@ Principio aplicado:
 - Se agregó confirmación antes de borrar una venta.
 - La restauración de stock sigue siendo transaccional en repository.
 - Se decidió manejar el diálogo como estado local de UI.
+
+## Home como startDestination
+
+- Se decidió incorporar una pantalla Home para que el MVP tenga una entrada clara tipo dashboard.
+- Home no maneja NavController: recibe callbacks para mantener desacoplamiento.
+- Se prioriza primero navegación funcional (placeholder) y luego UI/metrics en los próximos bloques.

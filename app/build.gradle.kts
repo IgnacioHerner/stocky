@@ -75,6 +75,9 @@ dependencies {
     // --- NUEVO: Navigation Compose ---
     implementation("androidx.navigation:navigation-compose:2.8.5")
 
+    // constraintLayout Compose
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
+
     // --- NUEVO: Room (DB local) ---
     implementation("androidx.room:room-runtime:2.8.1")
     implementation("androidx.room:room-ktx:2.8.1")

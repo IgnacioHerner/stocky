@@ -366,3 +366,14 @@ La UI ya no depende de IDs técnicos.
 - Se agregó un AlertDialog en SaleDetailScreen.
 - El usuario debe confirmar antes de ejecutar deleteSale().
 - Mejora UX y evita eliminación accidental.
+- 
+### Bloque 3.8.1 – Home como pantalla inicial
+
+- Se agregó la ruta HOME y se configuró como startDestination del NavHost.
+- Se creó HomeScreen (placeholder) con dos acciones:
+    - Navegar a Productos
+    - Navegar a Historial de ventas
+- La navegación se mantiene centralizada en StockyNavGraph mediante callbacks.
+
+Resultado: la app ahora inicia en un Home Dashboard (base) y permite entrar a los módulos principales.
+
