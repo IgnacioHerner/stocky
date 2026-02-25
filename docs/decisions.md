@@ -148,3 +148,57 @@
 - El filtrado se realiza en DAO (BETWEEN) por performance.
 - Se normalizan fechas a inicio/fin del día para evitar excluir ventas por hora.
 - El ViewModel usa un flujo de rango + flatMapLatest para cancelar observaciones anteriores automáticamente.
+
+## Eliminar venta con consistencia
+
+- Se restaura stock al eliminar una venta para mantener inventario correcto.
+- La operación se hace dentro de withTransaction (atomicidad).
+- SaleDetailViewModel es parametrizado por saleId, por eso requiere Factory con parámetro.
+
+## Modelado de datos en UI (Bloque 3.5)
+
+Decisión:
+La UI no debe trabajar con entidades de base de datos directamente.
+
+Motivo:
+- Las entidades reflejan estructura de almacenamiento.
+- La UI necesita información lista para mostrar.
+- Evita que la UI haga lógica de transformación o joins.
+
+Implementación:
+- Se creó un modelo intermedio (SaleItemDetailUi).
+- El ViewModel transforma datos de dominio a modelo de presentación.
+- Se usa combine para sincronizar venta + productos.
+
+Beneficios:
+- Separación clara entre capa de datos y capa de presentación.
+- UI más simple.
+- Código más mantenible.
+- Facilita futuras mejoras (ej: agregar categoría, imagen, etc.).
+
+Principio aplicado:
+"El ViewModel adapta los datos para la UI, la UI solo renderiza."
+
+
+## Confirmación de eliminación
+
+- Se agregó confirmación antes de borrar una venta.
+- La restauración de stock sigue siendo transaccional en repository.
+- Se decidió manejar el diálogo como estado local de UI.
+
+## Home como startDestination
+
+- Se decidió incorporar una pantalla Home para que el MVP tenga una entrada clara tipo dashboard.
+- Home no maneja NavController: recibe callbacks para mantener desacoplamiento.
+- Se prioriza primero navegación funcional (placeholder) y luego UI/metrics en los próximos bloques.
+
+## Home Dashboard
+
+- Se decidió agregar un Home como startDestination para que el MVP tenga una entrada clara tipo app real.
+- Las métricas se calculan en HomeViewModel (no en UI) para respetar separación de responsabilidades.
+- Se usa combine(products, sales) para actualizar el dashboard de forma reactiva.
+- Layout hecho con ConstraintLayout Compose para practicar constraints sin XML y mantener un diseño adaptable.
+- Ganancia del MVP se calcula de forma histórica usando:
+    - unitPrice guardado en el item (precio real al momento de la venta)
+    - cost actual del producto (simplificación aceptable para MVP).
+

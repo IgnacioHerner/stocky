@@ -309,3 +309,88 @@ Se corrigió la condición de renderizado en SalesHistoryScreen:
     - to = fin del día
 
 Resultado: el historial permite filtrar ventas por fechas sin perder ventas del día por diferencias de hora.
+
+
+### Bloque 3.4 – Detalle de venta + eliminar con restauración de stock
+
+- Se agregó navegación a detalle de venta con argumento saleId.
+- SaleDao incorpora query para observar SaleWithItems por id.
+- Se creó SaleDetailViewModel (parametrizado por saleId) y su Factory.
+- Se implementó deleteSaleAndRestoreStock en SalesRepository con transacción:
+    - obtiene items
+    - restaura stock
+    - borra items y sale
+- SaleDetailScreen muestra información de venta e items, y permite eliminar.
+
+Resultado: se puede corregir una venta errónea sin romper consistencia del inventario.
+
+### Bloque 3.5 – Mostrar nombre del producto en el detalle de venta
+
+Objetivo:
+Reemplazar la visualización de productId en SaleDetailScreen por el nombre real del producto.
+
+Problema:
+SaleItemEntity solo contiene productId, quantity y unitPrice.
+La UI mostraba información técnica (ID) en lugar de información útil para el usuario.
+
+Solución implementada:
+
+- Se creó el modelo de UI `SaleItemDetailUi`:
+    - productId
+    - productName
+    - quantity
+    - unitPrice
+    - subtotal (calculado)
+
+- Se modificó `SaleDetailUiState` para exponer `itemsUi` en vez de `SaleItemEntity`.
+
+- En `SaleDetailViewModel`:
+    - Se combinaron los flows:
+        - observeSaleWithItems(saleId)
+        - observeProducts()
+    - Se creó un mapa id → name usando associateBy.
+    - Se transformaron los SaleItemEntity en SaleItemDetailUi.
+
+- Se actualizó `SaleDetailScreen` para renderizar:
+    - Nombre del producto
+    - Cantidad
+    - Precio unitario
+    - Subtotal
+
+Resultado:
+El detalle de venta ahora muestra información comprensible y profesional.
+La UI ya no depende de IDs técnicos.
+
+### Bloque 3.6 – Confirm dialog antes de eliminar venta
+
+- Se agregó un AlertDialog en SaleDetailScreen.
+- El usuario debe confirmar antes de ejecutar deleteSale().
+- Mejora UX y evita eliminación accidental.
+- 
+### Bloque 3.8 – Home como pantalla inicial
+
+- Se agregó la ruta HOME y se configuró como startDestination del NavHost.
+- Se creó HomeScreen (placeholder) con dos acciones:
+    - Navegar a Productos
+    - Navegar a Historial de ventas
+- La navegación se mantiene centralizada en StockyNavGraph mediante callbacks.
+
+Resultado: la app ahora inicia en un Home Dashboard (base) y permite entrar a los módulos principales.
+
+### Bloque 3.8.1 – Home Dashboard con ConstraintLayout (Compose)
+
+- Se creó la pantalla Home como dashboard inicial del MVP.
+- Se incorporó HomeViewModel + HomeUiState para calcular métricas reales:
+    - Inventario valuado a costo (cost * stock)
+    - Inventario valuado a venta (salePrice * stock)
+    - Stock bajo (stock <= mínimo)
+    - Ganancia histórica (sumatoria de (unitPrice - cost) * quantity)
+- Se implementó el layout del Home con ConstraintLayout Compose:
+    - 2 cards arriba (costo/venta)
+    - 1 card abajo ocupando ancho completo (ganancia)
+    - 2 cards de acciones (Productos/Ventas)
+- Navegación desde Home por callbacks, centralizada en StockyNavGraph.
+
+Resultado: el MVP inicia en un dashboard visual y útil, listo para demo y publicación.
+
+

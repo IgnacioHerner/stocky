@@ -26,6 +26,9 @@ class SalesRepository(
     fun observeSalesBetween(from: Long, to: Long): Flow<List<SaleWithItems>> =
         saleDao.observeSalesWithItemsBetween(from, to)
 
+    fun observeSaleWithItems(saleId: Long) =
+        saleDao.observeSaleWithItems(saleId)
+
     suspend fun registerSale(
         date: Long,
         items: List<NewSaleItem>
@@ -45,11 +48,15 @@ class SalesRepository(
 
             // 3) Insert items
             val saleItemsEntities = items.map { item ->
+                val product = productDao.getById(item.productId)
+                    ?:throw java.lang.IllegalStateException("Producto no encontrado: ${item.productId}")
                 SaleItemEntity(
                     saleId = saleId,
                     productId = item.productId,
                     quantity = item.quantity,
-                    unitPrice = item.unitPrice
+                    unitPrice = item.unitPrice,
+                    unitCost = product.cost
+
                 )
             }
             saleDao.insertSaleItems(saleItemsEntities)
@@ -69,6 +76,32 @@ class SalesRepository(
 
                 productDao.updateStock(productId = product.id, newStock = newStock)
             }
+        }
+    }
+
+    suspend fun deleteSaleAndRestoreStock(saleId: Long) {
+        database.withTransaction {
+
+            // 1) Traer items vendidos
+            val items = saleDao.getSaleItems(saleId)
+            if (items.isEmpty()) {
+                // Si no hay items, igual borramos sale por si existe
+                saleDao.deleteSaleById(saleId)
+                return@withTransaction
+            }
+
+            // 2) Restaurar stock producto por producto
+            for(item in items) {
+                val product = productDao.getById(item.productId)
+                    ?: continue // Si el producto no existe, evitamos crashear
+
+                val restored = product.currentStock + item.quantity
+                productDao.updateStock(product.id, restored)
+            }
+
+            // 3) Borrar items y sale (en este orden)
+            saleDao.deleteSaleItemsBySaleId(saleId)
+            saleDao.deleteSaleById(saleId)
         }
     }
 }

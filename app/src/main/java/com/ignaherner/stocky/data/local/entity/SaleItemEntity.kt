@@ -31,5 +31,6 @@ data class SaleItemEntity(
     val saleId: Long,
     val productId: Long,
     val quantity: Int,
-    val unitPrice: Double
+    val unitPrice: Double,
+    val unitCost: Double
 )

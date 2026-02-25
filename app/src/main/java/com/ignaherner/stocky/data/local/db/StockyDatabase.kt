@@ -15,7 +15,7 @@ import com.ignaherner.stocky.data.local.entity.SaleItemEntity
         SaleEntity::class,
         SaleItemEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class StockyDatabase : RoomDatabase() {

@@ -19,6 +19,19 @@ interface SaleDao {
     @Query("SELECT * FROM sales WHERE date BETWEEN :from AND :to ORDER BY date DESC")
     fun observeSalesWithItemsBetween(from: Long, to: Long): Flow<List<SaleWithItems>>
 
+    @Transaction
+    @Query("SELECT * FROM sales WHERE id = :saleId LIMIT 1")
+    fun observeSaleWithItems(saleId: Long): Flow<SaleWithItems>
+
+    @Query("SELECT * FROM sale_items WHERE saleId = :saleId")
+    suspend fun getSaleItems(saleId: Long): List<SaleItemEntity>
+
+    @Query("DELETE FROM sale_items WHERE saleId = :saleId")
+    suspend fun deleteSaleItemsBySaleId(saleId: Long)
+
+    @Query("DELETE FROM sales WHERE id = :saleId")
+    suspend fun deleteSaleById(saleId: Long)
+
     @Query("SELECT COUNT(*) FROM sales")
     fun observeSalesCount(): Flow<Int>
 
