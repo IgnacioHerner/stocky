@@ -219,3 +219,9 @@ Principio aplicado:
 - Se decidió mostrar el resultado de registrar venta mediante Snackbar.
 - En éxito, se limpia el estado del formulario y se navega al historial para reforzar el flujo natural del usuario.
 - Se implementó un mecanismo simple de eventos con flags (shouldNavigateToHistory) + consumo para evitar duplicados por recomposición.
+
+## Quick filters en historial
+
+- Se decidió agregar filtros rápidos (Hoy/7 días/Mes) para acelerar el uso del historial.
+- Se calcula el rango usando startOfDay/endOfDay con ZoneId.systemDefault() para consistencia local.
+- Se mantiene el filtro manual por DatePicker como opción complementaria.

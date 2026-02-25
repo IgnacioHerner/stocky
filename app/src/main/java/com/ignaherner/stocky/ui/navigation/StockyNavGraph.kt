@@ -13,9 +13,9 @@ import com.ignaherner.stocky.ui.screens.home.HomeScreen
 import com.ignaherner.stocky.ui.screens.home.HomeViewModel
 import com.ignaherner.stocky.ui.screens.products.ProductsScreen
 import com.ignaherner.stocky.ui.screens.products.ProductsViewModel
-import com.ignaherner.stocky.ui.screens.sales.NewSaleScreen
-import com.ignaherner.stocky.ui.screens.sales.NewSaleViewModel
-import com.ignaherner.stocky.ui.screens.sales.NewSaleViewModelFactory
+import com.ignaherner.stocky.ui.screens.sales.new_sale.NewSaleScreen
+import com.ignaherner.stocky.ui.screens.sales.new_sale.NewSaleViewModel
+import com.ignaherner.stocky.ui.screens.sales.new_sale.NewSaleViewModelFactory
 import com.ignaherner.stocky.ui.screens.sales.sale_detail.SaleDetailScreen
 import com.ignaherner.stocky.ui.screens.sales.sale_detail.SaleDetailViewModel
 import com.ignaherner.stocky.ui.screens.sales.sales_history.SalesHistoryScreen

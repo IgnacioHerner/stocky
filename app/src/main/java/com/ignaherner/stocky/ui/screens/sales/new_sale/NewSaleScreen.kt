@@ -1,4 +1,4 @@
-package com.ignaherner.stocky.ui.screens.sales
+package com.ignaherner.stocky.ui.screens.sales.new_sale
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.stocky.data.local.entity.ProductEntity
+import com.ignaherner.stocky.ui.screens.sales.new_sale.NewSaleViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

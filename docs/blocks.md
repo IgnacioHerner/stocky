@@ -415,3 +415,12 @@ Resultado: el MVP inicia en un dashboard visual y útil, listo para demo y publi
     - En error: snackbar con mensaje y se mantiene el carrito para corregir.
 - Se controló la navegación desde la UI mediante flags en NewSaleUiState.
 - Se agregaron métodos consumeMessage/consumeNavigation para evitar re-ejecución en recomposiciones.
+
+### Bloque 3.12 – Filtros rápidos en historial de ventas
+
+- Se agregaron quick filters para mejorar UX del historial:
+    - Hoy, Últimos 7 días, Este mes, Limpiar.
+- Se centralizó la lógica de rangos de fechas en DateRanges (java.time) para evitar bugs de zona horaria.
+- Los filtros actualizan from/to en el state y refrescan la lista filtrada.
+
+Resultado: filtrado por fecha en un toque, ideal para demo y uso real.

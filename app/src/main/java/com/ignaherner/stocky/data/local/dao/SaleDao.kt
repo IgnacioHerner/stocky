@@ -16,8 +16,8 @@ interface SaleDao {
     fun observeSalesWithItems(): Flow<List<SaleWithItems>>
 
     @Transaction
-    @Query("SELECT * FROM sales WHERE date BETWEEN :from AND :to ORDER BY date DESC")
-    fun observeSalesWithItemsBetween(from: Long, to: Long): Flow<List<SaleWithItems>>
+    @Query("SELECT * FROM sales WHERE (:from is NULL OR date >= :from) AND (:to IS NULL OR date <= :to) ORDER BY date DESC")
+    fun observeSalesWithItemsBetween(from: Long?, to: Long?): Flow<List<SaleWithItems>>
 
     @Transaction
     @Query("SELECT * FROM sales WHERE id = :saleId LIMIT 1")

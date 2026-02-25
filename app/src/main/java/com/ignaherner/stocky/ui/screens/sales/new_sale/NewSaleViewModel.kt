@@ -1,12 +1,12 @@
-package com.ignaherner.stocky.ui.screens.sales
+package com.ignaherner.stocky.ui.screens.sales.new_sale
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ignaherner.stocky.data.local.entity.ProductEntity
 import com.ignaherner.stocky.data.repository.InsufficientStockException
-import com.ignaherner.stocky.data.repository.models.NewSaleItem
 import com.ignaherner.stocky.data.repository.ProductRepository
 import com.ignaherner.stocky.data.repository.SalesRepository
+import com.ignaherner.stocky.data.repository.models.NewSaleItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
