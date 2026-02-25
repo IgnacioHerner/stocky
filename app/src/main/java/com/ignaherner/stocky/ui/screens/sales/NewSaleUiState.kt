@@ -8,7 +8,8 @@ data class NewSaleUiState(
     val quantityText: String = "",
     val cart: List<CartItemUi> = emptyList(),
     val isSaving: Boolean = false,
-    val message: String? = null
+    val message: String? = null,
+    val shouldNavigateToHistory: Boolean = false
 ) {
     val total: Double = cart.sumOf { it.lineTotal }
 }

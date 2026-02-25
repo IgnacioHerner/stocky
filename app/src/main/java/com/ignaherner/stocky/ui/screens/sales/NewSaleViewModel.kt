@@ -120,12 +120,27 @@ class NewSaleViewModel(
                     items = items
                 )
 
-                _uiState.update { it.copy(isSaving = false, cart = emptyList(), message = "Venta registrada ✅") }
+                _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        cart = emptyList(),
+                        message = "Venta registrada ✅",
+                        shouldNavigateToHistory = true
+                    )
+                }
             } catch (e: InsufficientStockException) {
-                _uiState.update { it.copy(isSaving = false, message = e.message ?: "Stock insuficiente.") }
+                _uiState.update { it.copy(isSaving = false, message = e.message ?: "Stock insuficiente.", shouldNavigateToHistory = false) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isSaving = false, message = "Error al guardar venta.") }
+                _uiState.update { it.copy(isSaving = false, message = "Error al guardar venta.", shouldNavigateToHistory = false) }
             }
         }
+    }
+
+    fun consumeMessage() {
+        _uiState.update { it.copy(message = null) }
+    }
+
+    fun consumeNavigation() {
+        _uiState.update { it.copy(shouldNavigateToHistory = false) }
     }
 }

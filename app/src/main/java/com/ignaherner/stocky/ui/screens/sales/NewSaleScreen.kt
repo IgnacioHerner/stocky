@@ -21,10 +21,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,11 +41,28 @@ import com.ignaherner.stocky.data.local.entity.ProductEntity
 @Composable
 fun NewSaleScreen(
     viewModel: NewSaleViewModel,
-    onBack: () -> Unit) {
+    onBack: () -> Unit,
+    onNavigateToHistory: () -> Unit
+) {
 
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(state.message) {
+        val msg = state.message ?: return@LaunchedEffect
+        snackbarHostState.showSnackbar(msg)
+        viewModel.consumeMessage()
+    }
+
+    LaunchedEffect(state.shouldNavigateToHistory) {
+        if (state.shouldNavigateToHistory) {
+            viewModel.consumeMessage()
+            onNavigateToHistory()
+        }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = { TopAppBar(
             title = { Text("Nueva venta") },
             navigationIcon = {

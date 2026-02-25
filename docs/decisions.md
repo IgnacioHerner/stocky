@@ -213,3 +213,9 @@ Principio aplicado:
 - Se valida stock dentro de registerSale (Repository) para garantizar el invariante "stock no negativo".
 - La validación ocurre antes de insertar registros para evitar trabajo innecesario.
 - Se consolidan items por productId para evitar inconsistencias si un producto aparece varias veces en el carrito.
+
+## Feedback de operaciones y navegación en NewSale
+
+- Se decidió mostrar el resultado de registrar venta mediante Snackbar.
+- En éxito, se limpia el estado del formulario y se navega al historial para reforzar el flujo natural del usuario.
+- Se implementó un mecanismo simple de eventos con flags (shouldNavigateToHistory) + consumo para evitar duplicados por recomposición.

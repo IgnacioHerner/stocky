@@ -50,8 +50,6 @@ class MainActivity : ComponentActivity() {
         val productsViewModel: ProductsViewModel =
             ViewModelProvider(this, productsFactory)[ProductsViewModel::class.java]
 
-        val newSaleViewModel: NewSaleViewModel =
-            ViewModelProvider(this, newSaleFactory)[NewSaleViewModel::class.java]
 
         val salesHistoryViewModel =
             ViewModelProvider(this, salesHistoryFactory)[SalesHistoryViewModel::class.java]
@@ -75,7 +73,6 @@ class MainActivity : ComponentActivity() {
                 StockyNavGraph(
                     navController = navController,
                     productsViewModelProvider = {productsViewModel},
-                    newSaleViewModelProvider = {newSaleViewModel},
                     salesHistoryModelProvider = {salesHistoryViewModel},
                     saleDetailFactoryProvider = saleDetailFactoryProvider,
                     homeViewModelProvider = {homeViewModel}

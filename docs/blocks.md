@@ -407,3 +407,11 @@ Resultado: el MVP inicia en un dashboard visual y útil, listo para demo y publi
 - Se consolidan cantidades por producto (groupBy + sumOf) para validar correctamente si un producto se repite en el carrito.
 - Si stock insuficiente → InsufficientStockException y rollback automático.
 - Luego de validar, se inserta Sale, SaleItems (con unitCost) y se actualiza stock con el consolidado.
+
+### Bloque 3.11 – Snackbar de resultado + navegación post-venta
+
+- Se agregó feedback UX al confirmar venta:
+    - En éxito: snackbar “Venta registrada”, limpieza del carrito y navegación al historial.
+    - En error: snackbar con mensaje y se mantiene el carrito para corregir.
+- Se controló la navegación desde la UI mediante flags en NewSaleUiState.
+- Se agregaron métodos consumeMessage/consumeNavigation para evitar re-ejecución en recomposiciones.
