@@ -393,4 +393,17 @@ Resultado: la app ahora inicia en un Home Dashboard (base) y permite entrar a lo
 
 Resultado: el MVP inicia en un dashboard visual y útil, listo para demo y publicación.
 
+### Bloque 3.9 – unitCost histórico en SaleItem (ganancia consistente)
 
+- Se agregó el campo `unitCost` en `SaleItemEntity` para congelar el costo al momento de registrar una venta.
+- Al crear los items de la venta, se obtiene el `cost` del producto desde DB y se guarda como `unitCost`.
+- Se incrementó la versión de `StockyDatabase` para reflejar el cambio de esquema.
+- Como se usa `fallbackToDestructiveMigration()`, la base local se recrea automáticamente (se pierden datos de prueba).
+- Resultado: la ganancia histórica no cambia si se editan costos de productos después.
+
+### Bloque 3.10 – Validación de stock en registerSale (Repository)
+
+- Se implementó validación de stock dentro de withTransaction antes de insertar la venta.
+- Se consolidan cantidades por producto (groupBy + sumOf) para validar correctamente si un producto se repite en el carrito.
+- Si stock insuficiente → InsufficientStockException y rollback automático.
+- Luego de validar, se inserta Sale, SaleItems (con unitCost) y se actualiza stock con el consolidado.

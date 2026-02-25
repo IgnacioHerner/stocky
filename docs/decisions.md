@@ -202,3 +202,14 @@ Principio aplicado:
     - unitPrice guardado en el item (precio real al momento de la venta)
     - cost actual del producto (simplificación aceptable para MVP).
 
+## unitCost histórico en SaleItem
+
+- Se decidió guardar `unitCost` dentro de `SaleItemEntity` para mantener consistencia histórica.
+- Las ventas representan eventos pasados: deben congelar valores relevantes (unitPrice y unitCost).
+- Esto evita que el profit cambie si se actualiza el costo del producto en el futuro.
+
+## Validación de stock en capa Repository
+
+- Se valida stock dentro de registerSale (Repository) para garantizar el invariante "stock no negativo".
+- La validación ocurre antes de insertar registros para evitar trabajo innecesario.
+- Se consolidan items por productId para evitar inconsistencias si un producto aparece varias veces en el carrito.

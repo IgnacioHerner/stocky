@@ -7,6 +7,7 @@ import com.ignaherner.stocky.data.local.entity.SaleItemEntity
 import com.ignaherner.stocky.data.local.relation.SaleWithItems
 import com.ignaherner.stocky.data.repository.models.NewSaleItem
 import kotlinx.coroutines.flow.Flow
+import java.lang.IllegalStateException
 
 class SalesRepository(
     private val database: StockyDatabase
@@ -32,13 +33,31 @@ class SalesRepository(
     suspend fun registerSale(
         date: Long,
         items: List<NewSaleItem>
-    ) {
+    ){
         database.withTransaction {
 
-            // 1) Validar stock y cualquier stock dentro de transaccion (estado consistente)
+            // Consolidar cantidades por producto (evita duplicados en el carrito)
+            val requestByProductId: Map<Long, Int> =
+                items.groupBy { it.productId }
+                    .mapValues { (_, list) -> list.sumOf { it.quantity } }
+
+            // Validar stock antes de insertar nada
+            requestByProductId.forEach { (productId, requestedQty) ->
+                val product = productDao.getById(productId)
+                    ?: throw IllegalStateException("Producto $productId no existe")
+
+                val newStock = product.currentStock - requestedQty
+                if(newStock < 0) {
+                    throw InsufficientStockException(
+                        "Stock insuficiente para '${product.name}'. Disponible: ${product.currentStock}, requerido: $requestedQty"
+                    )
+                }
+            }
+
+            // Calcular total
             val total = items.sumOf { it.unitPrice * it.quantity }
 
-            // 2) Insert sale y obtener saleId
+            // Insert sale y obtener saleId
             val saleId = saleDao.insertSale(
                 SaleEntity(
                     date = date,
@@ -46,38 +65,34 @@ class SalesRepository(
                 )
             )
 
-            // 3) Insert items
+            // Insert items
             val saleItemsEntities = items.map { item ->
                 val product = productDao.getById(item.productId)
-                    ?:throw java.lang.IllegalStateException("Producto no encontrado: ${item.productId}")
+                    ?: throw IllegalStateException("Producto no encontrado: ${item.productId}")
+
                 SaleItemEntity(
                     saleId = saleId,
                     productId = item.productId,
                     quantity = item.quantity,
                     unitPrice = item.unitPrice,
                     unitCost = product.cost
-
                 )
             }
             saleDao.insertSaleItems(saleItemsEntities)
 
-            // 4) Descontar stock (con validacion)
-            // Importante: si tiramos exception, Room revierte toda la transaccion
-            for(item in items) {
-                val product = productDao.getById(item.productId)
-                    ?: throw IllegalStateException("Producto ${item.productId} no existe")
-                val newStock = product.currentStock - item.quantity
+            //Actualizar stock usando el consolidado
+            requestByProductId.forEach { (productId, requestedQty) ->
+                val product = productDao.getById(productId)
+                    ?: throw IllegalStateException("Producto $productId no existe")
 
-                if(newStock < 0 ) {
-                    throw InsufficientStockException(
-                        "Stock insuficiente para '${product.name}'. Disponible: ${product.currentStock}, requerido: ${item.quantity}"
-                    )
-                }
-
-                productDao.updateStock(productId = product.id, newStock = newStock)
+                val newStock = product.currentStock - requestedQty
+                productDao.updateStock(productId = productId, newStock = newStock )
             }
+
+
         }
     }
+
 
     suspend fun deleteSaleAndRestoreStock(saleId: Long) {
         database.withTransaction {
@@ -107,5 +122,4 @@ class SalesRepository(
 }
 
 class InsufficientStockException(message: String) : Exception(message)
-
 
