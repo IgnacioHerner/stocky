@@ -42,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.stocky.ui.components.EmptyState
 import com.ignaherner.stocky.ui.components.LoadingState
 import com.ignaherner.stocky.ui.utils.CurrencyFormatter
+import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
@@ -93,7 +94,11 @@ fun SalesHistoryScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
     var loadedOnce by rememberSaveable { mutableStateOf(false) }
-    LaunchedEffect(state.sales) { loadedOnce = true }
+
+    LaunchedEffect(state.sales) {
+        delay(500)
+        loadedOnce = true
+    }
 
     val isLoading = !loadedOnce
 

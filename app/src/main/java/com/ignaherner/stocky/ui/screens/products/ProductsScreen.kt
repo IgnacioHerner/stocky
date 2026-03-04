@@ -41,6 +41,7 @@ import com.ignaherner.stocky.data.local.entity.ProductEntity
 import com.ignaherner.stocky.ui.components.EmptyState
 import com.ignaherner.stocky.ui.components.LoadingState
 import com.ignaherner.stocky.ui.utils.CurrencyFormatter
+import kotlinx.coroutines.delay
 
 @Composable
 fun ProductsScreen(
@@ -52,6 +53,7 @@ fun ProductsScreen(
 
     var loadedOnce by rememberSaveable { mutableStateOf(false)}
     LaunchedEffect(state.products) {
+        delay(500)
         loadedOnce = true
     }
 
