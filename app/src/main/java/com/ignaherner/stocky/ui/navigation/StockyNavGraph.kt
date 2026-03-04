@@ -2,16 +2,20 @@ package com.ignaherner.stocky.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.ignaherner.stocky.StockyApp
 import com.ignaherner.stocky.ui.screens.home.HomeScreen
 import com.ignaherner.stocky.ui.screens.home.HomeViewModel
 import com.ignaherner.stocky.ui.screens.products.ProductsScreen
 import com.ignaherner.stocky.ui.screens.products.ProductsViewModel
-import com.ignaherner.stocky.ui.screens.sales.NewSaleScreen
-import com.ignaherner.stocky.ui.screens.sales.NewSaleViewModel
+import com.ignaherner.stocky.ui.screens.sales.new_sale.NewSaleScreen
+import com.ignaherner.stocky.ui.screens.sales.new_sale.NewSaleViewModel
+import com.ignaherner.stocky.ui.screens.sales.new_sale.NewSaleViewModelFactory
 import com.ignaherner.stocky.ui.screens.sales.sale_detail.SaleDetailScreen
 import com.ignaherner.stocky.ui.screens.sales.sale_detail.SaleDetailViewModel
 import com.ignaherner.stocky.ui.screens.sales.sales_history.SalesHistoryScreen
@@ -21,7 +25,6 @@ import com.ignaherner.stocky.ui.screens.sales.sales_history.SalesHistoryViewMode
 fun StockyNavGraph(
     navController: NavHostController,
     productsViewModelProvider: @Composable () -> ProductsViewModel,
-    newSaleViewModelProvider: @Composable () -> NewSaleViewModel,
     salesHistoryModelProvider: @Composable () -> SalesHistoryViewModel,
     saleDetailFactoryProvider: (Long) -> ViewModelProvider.Factory,
     homeViewModelProvider: @Composable () -> HomeViewModel,
@@ -33,10 +36,19 @@ fun StockyNavGraph(
         modifier = modifier
     ) {
         composable (Routes.HOME) {
+            val productsVw = productsViewModelProvider()
+
             HomeScreen(
                 viewModel = homeViewModelProvider(),
-                onProductsClick = {navController.navigate(Routes.PRODUCTS)},
-                onSalesClick = {navController.navigate(Routes.SALES_HISTORY)}
+                onProductsClick = {
+                    productsVw.setShowOnlyLowStock(false)
+                    navController.navigate(Routes.PRODUCTS)
+                },
+                onSalesClick = {navController.navigate(Routes.SALES_HISTORY)},
+                onLowStockClick = {
+                    productsVw.setShowOnlyLowStock(true)
+                    navController.navigate(Routes.PRODUCTS)
+                }
             )
         }
 
@@ -49,10 +61,28 @@ fun StockyNavGraph(
             )
         }
 
-        composable(Routes.NEW_SALE) {
+        composable(Routes.NEW_SALE) { backStackEntry ->
+            val app = (LocalContext.current.applicationContext as StockyApp)
+
+            val factory = NewSaleViewModelFactory(
+                salesRepository = app.container.salesRepository,
+                productRepository = app.container.productRepository
+            )
+
+            val viewModel: NewSaleViewModel = viewModel(
+                viewModelStoreOwner = backStackEntry,
+                factory = factory
+            )
+
             NewSaleScreen(
-                viewModel = newSaleViewModelProvider(),
-                onBack = { navController.popBackStack()}
+                viewModel = viewModel,
+                onBack = {navController.popBackStack()},
+                onNavigateToHistory = {
+                    navController.navigate(Routes.SALES_HISTORY) {
+                        popUpTo(Routes.NEW_SALE) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
             )
         }
 

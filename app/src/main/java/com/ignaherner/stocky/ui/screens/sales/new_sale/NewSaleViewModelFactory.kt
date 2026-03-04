@@ -1,4 +1,4 @@
-package com.ignaherner.stocky.ui.screens.sales
+package com.ignaherner.stocky.ui.screens.sales.new_sale
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

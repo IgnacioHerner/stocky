@@ -1,4 +1,4 @@
-package com.ignaherner.stocky.ui.screens.sales
+package com.ignaherner.stocky.ui.screens.sales.new_sale
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,10 +21,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,16 +36,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.stocky.data.local.entity.ProductEntity
+import com.ignaherner.stocky.ui.screens.sales.new_sale.NewSaleViewModel
+import com.ignaherner.stocky.ui.utils.CurrencyFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewSaleScreen(
     viewModel: NewSaleViewModel,
-    onBack: () -> Unit) {
+    onBack: () -> Unit,
+    onNavigateToHistory: () -> Unit
+) {
 
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(state.message) {
+        val msg = state.message ?: return@LaunchedEffect
+        snackbarHostState.showSnackbar(msg)
+        viewModel.consumeMessage()
+    }
+
+    LaunchedEffect(state.shouldNavigateToHistory) {
+        if (state.shouldNavigateToHistory) {
+            viewModel.consumeMessage()
+            onNavigateToHistory()
+        }
+    }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = { TopAppBar(
             title = { Text("Nueva venta") },
             navigationIcon = {
@@ -93,8 +115,8 @@ fun NewSaleScreen(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(item.name, style = MaterialTheme.typography.titleMedium)
-                                Text("Cantidad: ${item.quantity}  •  Precio: ${item.unitPrice}")
-                                Text("Subtotal: ${item.lineTotal}")
+                                Text("Cantidad: ${item.quantity}  •  Precio: ${CurrencyFormatter.formatARS(item.unitPrice)}")
+                                Text("Subtotal: ${CurrencyFormatter.formatARS(item.lineTotal)}")
                             }
                             TextButton(onClick = { viewModel.removeFromCart(item.productId) }) {
                                 Text("Quitar")
@@ -104,7 +126,7 @@ fun NewSaleScreen(
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Total: ${state.total} ARS", style = MaterialTheme.typography.titleMedium)
+                Text("Total: ${CurrencyFormatter.formatARS(state.total)} ARS", style = MaterialTheme.typography.titleMedium)
             }
 
             Button(

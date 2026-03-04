@@ -1,12 +1,12 @@
-package com.ignaherner.stocky.ui.screens.sales
+package com.ignaherner.stocky.ui.screens.sales.new_sale
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ignaherner.stocky.data.local.entity.ProductEntity
 import com.ignaherner.stocky.data.repository.InsufficientStockException
-import com.ignaherner.stocky.data.repository.models.NewSaleItem
 import com.ignaherner.stocky.data.repository.ProductRepository
 import com.ignaherner.stocky.data.repository.SalesRepository
+import com.ignaherner.stocky.data.repository.models.NewSaleItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -120,12 +120,27 @@ class NewSaleViewModel(
                     items = items
                 )
 
-                _uiState.update { it.copy(isSaving = false, cart = emptyList(), message = "Venta registrada ✅") }
+                _uiState.update {
+                    it.copy(
+                        isSaving = false,
+                        cart = emptyList(),
+                        message = "Venta registrada ✅",
+                        shouldNavigateToHistory = true
+                    )
+                }
             } catch (e: InsufficientStockException) {
-                _uiState.update { it.copy(isSaving = false, message = e.message ?: "Stock insuficiente.") }
+                _uiState.update { it.copy(isSaving = false, message = e.message ?: "Stock insuficiente.", shouldNavigateToHistory = false) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isSaving = false, message = "Error al guardar venta.") }
+                _uiState.update { it.copy(isSaving = false, message = "Error al guardar venta.", shouldNavigateToHistory = false) }
             }
         }
+    }
+
+    fun consumeMessage() {
+        _uiState.update { it.copy(message = null) }
+    }
+
+    fun consumeNavigation() {
+        _uiState.update { it.copy(shouldNavigateToHistory = false) }
     }
 }

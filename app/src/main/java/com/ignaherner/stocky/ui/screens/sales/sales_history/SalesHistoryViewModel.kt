@@ -3,6 +3,8 @@ package com.ignaherner.stocky.ui.screens.sales.sales_history
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ignaherner.stocky.data.repository.SalesRepository
+import com.ignaherner.stocky.ui.utils.DateRanges
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -19,9 +21,10 @@ data class SalesHistoryUiState(
     val message: String? = null
 )
 
-private data class DateRange(val from: Long, val to: Long)
+private data class DateRange(val from: Long?, val to: Long?)
 
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class SalesHistoryViewModel(
     private val salesRepository: SalesRepository
 
@@ -30,19 +33,14 @@ class SalesHistoryViewModel(
     private val _uiState = MutableStateFlow(SalesHistoryUiState())
     val uiState: StateFlow<SalesHistoryUiState> = _uiState
 
-    private val rangeFlow = MutableStateFlow<DateRange?>(null)
+    private val rangeFlow = MutableStateFlow(DateRange(null, null))
 
     init {
-        val now = System.currentTimeMillis()
-        val from = now - TimeUnit.DAYS.toMillis(30)
-        val to = now
-
-        rangeFlow.value = DateRange(from, to)
-
         viewModelScope.launch {
             rangeFlow
-                .filterNotNull()
-                .flatMapLatest { range ->  salesRepository.observeSalesBetween(range.from, range.to) }
+                .flatMapLatest { range ->
+                    salesRepository.observeSalesBetween(range.from, range.to)
+                }
                 .collectLatest { sales ->
                     val mapped = sales.map { saleWithItems ->
                         val itemsCount = saleWithItems.items.size
@@ -57,19 +55,39 @@ class SalesHistoryViewModel(
                         )
                     }
 
+                    val range = rangeFlow.value
                     _uiState.update {
                         it.copy(
                             sales = mapped,
-                            fromSelected = rangeFlow.value!!.from,
-                            toSelected = rangeFlow.value!!.to
+                            fromSelected = range.from,
+                            toSelected = range.to
                         )
                     }
                 }
         }
-
     }
 
-    fun applyFilter(from: Long, to: Long) {
+
+    fun applyFilter(from: Long?, to: Long?) {
         rangeFlow.value = DateRange(from, to)
+    }
+
+    fun setTodayFilter() {
+        val (from, to) = DateRanges.today()
+        applyFilter (from, to)
+    }
+
+    fun setLast7DaysFilter() {
+        val (from, to) = DateRanges.last7Days()
+        applyFilter(from, to)
+    }
+
+    fun setThisMonthFilter() {
+        val (from, to) = DateRanges.thisMonthToToday()
+        applyFilter(from, to)
+    }
+
+    fun clearFilter() {
+        applyFilter(null, null)
     }
 }

@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ignaherner.stocky.ui.utils.CurrencyFormatter
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -73,9 +74,9 @@ fun SaleDetailScreen(
 
             val formatter = remember { SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()) }
             Text("Fecha: ${formatter.format(Date(sale.date))}", style = MaterialTheme.typography.titleMedium)
-            Text("Total: ${sale.total} ARS")
+            Text("Total: ${CurrencyFormatter.formatARS(sale.total)} ARS")
             Text(
-                text = "Ganancia: ${"%.2f".format(state.totalProfit)} ARS",
+                text = "Ganancia: ${CurrencyFormatter.formatARS(state.totalProfit)} ARS",
                 style = MaterialTheme.typography.titleMedium
             )
 
@@ -92,9 +93,9 @@ fun SaleDetailScreen(
                         Column(modifier = Modifier.padding(12.dp)) {
                             Text(item.productName, style = MaterialTheme.typography.titleMedium)
                             Spacer(Modifier.height(4.dp))
-                            Text("Cant: ${item.quantity}  •  Unit: ${item.unitPrice}")
-                            Text("Subtotal: ${item.subtotal}")
-                            Text("Ganancia item: ${"%.2f".format(item.profit)}")
+                            Text("Cant: ${item.quantity}  •  Unit: ${CurrencyFormatter.formatARS(item.unitPrice)}")
+                            Text("Subtotal: ${CurrencyFormatter.formatARS(item.subtotal)}")
+                            Text("Ganancia item: ${CurrencyFormatter.formatARS(item.profit)}")
                         }
                     }
                 }
@@ -112,7 +113,7 @@ fun SaleDetailScreen(
                 AlertDialog(
                     onDismissRequest = { showDeleteDialog = false},
                     title = { Text("Confirmar eliminación")},
-                    text = { Text("¿Estás seguro que quéres eliminar esta venta? Esta accion restaurará el stock.")},
+                    text = { Text("¿Seguro? Esta acción no se puede deshacer.")},
                     confirmButton = {
                         TextButton(
                             onClick = {

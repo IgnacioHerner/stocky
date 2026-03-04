@@ -202,3 +202,75 @@ Principio aplicado:
     - unitPrice guardado en el item (precio real al momento de la venta)
     - cost actual del producto (simplificación aceptable para MVP).
 
+## unitCost histórico en SaleItem
+
+- Se decidió guardar `unitCost` dentro de `SaleItemEntity` para mantener consistencia histórica.
+- Las ventas representan eventos pasados: deben congelar valores relevantes (unitPrice y unitCost).
+- Esto evita que el profit cambie si se actualiza el costo del producto en el futuro.
+
+## Validación de stock en capa Repository
+
+- Se valida stock dentro de registerSale (Repository) para garantizar el invariante "stock no negativo".
+- La validación ocurre antes de insertar registros para evitar trabajo innecesario.
+- Se consolidan items por productId para evitar inconsistencias si un producto aparece varias veces en el carrito.
+
+## Feedback de operaciones y navegación en NewSale
+
+- Se decidió mostrar el resultado de registrar venta mediante Snackbar.
+- En éxito, se limpia el estado del formulario y se navega al historial para reforzar el flujo natural del usuario.
+- Se implementó un mecanismo simple de eventos con flags (shouldNavigateToHistory) + consumo para evitar duplicados por recomposición.
+
+## Quick filters en historial
+
+- Se decidió agregar filtros rápidos (Hoy/7 días/Mes) para acelerar el uso del historial.
+- Se calcula el rango usando startOfDay/endOfDay con ZoneId.systemDefault() para consistencia local.
+- Se mantiene el filtro manual por DatePicker como opción complementaria.
+
+## Formateo de dinero
+
+- Se decidió usar NumberFormat en vez de string interpolation.
+- Se centralizó en un object reutilizable.
+- Se utiliza Locale("es","AR") para coherencia local.
+- Evita problemas futuros al agregar soporte multi-moneda.
+
+## Home accionable: Stock bajo
+
+- Se decidió que Home sea un dashboard con acciones (no solo métricas).
+- El filtro "solo stock bajo" se controla desde ProductsViewModel para ser compartido entre pantallas.
+- Home define dos entradas:
+    - Productos: abre lista completa (showOnlyLowStock = false).
+    - Stock bajo: abre lista filtrada (showOnlyLowStock = true).
+
+## Eventos UI (Snackbars) con SharedFlow
+
+- Se decidió separar estado estable (StateFlow) de eventos one-shot (SharedFlow).
+- Los snackbars se disparan desde el ViewModel mediante UiEvent para evitar mensajes pegados o repetidos.
+- Patrón reutilizable para NewSale y otras pantallas.
+
+## Reposición de stock con query atómica
+
+- Se decidió actualizar stock con una query específica (increaseStock) en vez de actualizar toda la entidad.
+- Ventajas: operación atómica, menos riesgo de pisar campos, más simple y eficiente.
+- La UI no modifica directamente el estado; delega al ViewModel y Repository.
+
+## Producto más vendido calculado en ViewModel
+
+Se decidió calcular el producto más vendido en HomeViewModel utilizando los datos de SalesWithItems.
+
+Ventajas:
+- no requiere nueva query en Room
+- mantiene la lógica de agregación en la capa de presentación
+- evita complejidad en el DAO
+
+## Ordenamiento en ViewModel
+
+- Se decidió modelar el orden como estado del ViewModel (StateFlow) y no como estado local de UI.
+- Ventajas:
+    - Persistencia del criterio al navegar
+    - Escalable a más filtros (categoría/búsqueda)
+    - Lógica consistente y testeable
+
+## Home dashboard: consistencia visual
+
+- Se decidió unificar el estilo de cards (MetricCard y ActionCard) usando la misma estructura: icono opcional + columna con título y valor/subtítulo.
+- Se priorizó jerarquía visual simple y consistente para una demo publicable (LinkedIn) sin entrar en diseño avanzado.

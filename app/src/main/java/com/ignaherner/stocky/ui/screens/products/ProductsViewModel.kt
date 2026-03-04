@@ -4,36 +4,54 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ignaherner.stocky.data.local.entity.ProductEntity
 import com.ignaherner.stocky.data.repository.ProductRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-
-data class ProductsUiState(
-    val products: List<ProductEntity> = emptyList(),
-    val lowStockProducts: List<ProductEntity> = emptyList(),
-    val totalCost: Double = 0.0,
-    val totalSaleValue: Double = 0.0
-)
 
 class ProductsViewModel(
     private val repository: ProductRepository
 ) : ViewModel() {
 
+    private val showOnlyLowStockFlow = MutableStateFlow(false)
+
+    private val _events = MutableSharedFlow<ProductsUiEvent>()
+    val events = _events.asSharedFlow()
+
+    private val sortFlow = MutableStateFlow(ProductSort.NAME)
+
+    fun setSort(sort: ProductSort) {
+        println("Sort cambiando a: $sort")
+        sortFlow.value = sort
+    }
+
     val uiState: StateFlow<ProductsUiState> =
         combine(
             repository.observeProducts(),
             repository.observeTotalCost(),
-            repository.observeTotalSaleValue()
-        ) { products, totalCost, totalSale ->
+            repository.observeTotalSaleValue(),
+            showOnlyLowStockFlow,
+            sortFlow
+        ) { products, totalCost, totalSale, showOnlyLowStock, sort ->
+
+            val sortedProducts = when(sort) {
+                ProductSort.NAME -> products.sortedBy { it.name.lowercase() }
+                ProductSort.STOCK -> products.sortedBy { it.currentStock }
+                ProductSort.PRICE -> products.sortedBy { it.salePrice }
+            }
             ProductsUiState(
-                products = products,
+                products = sortedProducts,
                 lowStockProducts = products.filter {
                     it.currentStock <= it.minimumStock
                 },
                 totalCost = totalCost,
-                totalSaleValue = totalSale
+                totalSaleValue = totalSale,
+                showOnlyLowStock = showOnlyLowStock,
+                sort = sort
             )
         }.stateIn(
             scope = viewModelScope,
@@ -41,21 +59,43 @@ class ProductsViewModel(
             initialValue = ProductsUiState()
         )
 
+    fun setShowOnlyLowStock(enabled: Boolean) {
+        showOnlyLowStockFlow.value = enabled
+    }
+
+    fun toggleLowStockFilter() {
+        showOnlyLowStockFlow.value = !showOnlyLowStockFlow.value
+    }
+
+    fun restock(productId: Long, amount: Int) {
+        viewModelScope.launch {
+            if(amount <= 0) {
+                _events.emit(ProductsUiEvent.ShowSnackbar("Ingresá una cantidad válida"))
+                return@launch
+            }
+            repository.increaseStock(productId, amount)
+            _events.emit(ProductsUiEvent.ShowSnackbar("Stock actualizado"))
+        }
+    }
+
     fun insert(product: ProductEntity) {
         viewModelScope.launch {
             repository.insert(product)
+            _events.emit(ProductsUiEvent.ShowSnackbar("Producto creado"))
         }
     }
 
     fun update(product: ProductEntity) {
         viewModelScope.launch {
             repository.update(product)
+            _events.emit(ProductsUiEvent.ShowSnackbar("Producto actualizado"))
         }
     }
 
     fun delete(product: ProductEntity) {
         viewModelScope.launch {
             repository.delete(product)
+            _events.emit(ProductsUiEvent.ShowSnackbar("Producto eliminado"))
         }
     }
 }

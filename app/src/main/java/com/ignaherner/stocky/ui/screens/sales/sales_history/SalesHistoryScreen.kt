@@ -4,13 +4,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DatePicker
@@ -35,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ignaherner.stocky.ui.utils.CurrencyFormatter
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
@@ -97,9 +101,21 @@ fun SalesHistoryScreen(
         ) }
     ) { padding ->
         Column(
-            modifier = Modifier.padding(padding).padding(16.dp).fillMaxSize(),
+            modifier = Modifier
+                .padding(padding)
+                .padding(16.dp)
+                .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+
+            QuickFilterRow(
+                onToday = { viewModel.setTodayFilter() },
+                onLast7Days = {viewModel.setLast7DaysFilter()},
+                onThisMonth = { viewModel.setThisMonthFilter() },
+                onClear = { viewModel.clearFilter() },
+            )
+
+            Spacer(Modifier.height(12.dp))
 
             FilterRow(
                 from = state.fromSelected,
@@ -126,6 +142,26 @@ fun SalesHistoryScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun QuickFilterRow(
+    onToday: () -> Unit,
+    onLast7Days: () -> Unit,
+    onThisMonth: () -> Unit,
+    onClear: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        AssistChip(onClick = onToday, label = { Text("Hoy")})
+        AssistChip(onClick = onLast7Days, label = { Text("7 días")})
+        AssistChip(onClick = onThisMonth, label = { Text("Mes")})
+        AssistChip(onClick = onClear, label = { Text("Limpiar")})
+
+
     }
 }
 
@@ -216,11 +252,11 @@ fun SaleSummaryCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable{ onClick() }
+            .clickable { onClick() }
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(dateText, style = MaterialTheme.typography.titleMedium)
-            Text("Total: ${sale.total} ARS")
+            Text("Total: ${CurrencyFormatter.formatARS(sale.total)} ARS")
             Text("Lineas: ${sale.itemsCount} = Productos: ${sale.productsCount}")
         }
     }

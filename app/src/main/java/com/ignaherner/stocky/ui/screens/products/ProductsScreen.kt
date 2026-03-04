@@ -1,5 +1,6 @@
 package com.ignaherner.stocky.ui.screens.products
 
+import android.app.AlertDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,23 +11,36 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.stocky.data.local.entity.ProductEntity
+import com.ignaherner.stocky.ui.utils.CurrencyFormatter
+import kotlin.math.exp
 
 @Composable
 fun ProductsScreen(
@@ -36,16 +50,23 @@ fun ProductsScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when(event) {
+                is ProductsUiEvent.ShowSnackbar -> snackbarHostState.showSnackbar(event.message)
+            }
+        }
+    }
+
     var showFormDialog by rememberSaveable { mutableStateOf(false)}
     var editingProduct by rememberSaveable { mutableStateOf<ProductEntity?>(null)}
+    var restockTarget by rememberSaveable { mutableStateOf<ProductEntity?>(null) }
+    var restockAmountText by rememberSaveable {mutableStateOf("") }
 
-    var showOnlyLowStock by rememberSaveable { mutableStateOf(false)}
+    val productsToShow = if (state.showOnlyLowStock) state.lowStockProducts else state.products
 
-    val displayProducts = if(showOnlyLowStock){
-        state.lowStockProducts
-    } else {
-        state.products
-    }
 
     if (showFormDialog) {
         ProductFormDialog(
@@ -82,26 +103,47 @@ fun ProductsScreen(
         )
     }
 
+    if (restockTarget != null) {
+        RestockDialog(
+            product = restockTarget!!,
+            amountText = restockAmountText,
+            onAmountChange = { restockAmountText = it},
+            onDismiss = {
+                restockTarget = null
+                restockAmountText = ""
+            },
+            onConfirm = {
+                val amount = restockAmountText.toIntOrNull()
+
+                if(amount != null && amount > 0){
+                    viewModel.restock(restockTarget!!.id, amount)
+                }
+                restockTarget = null
+                restockAmountText = ""
+            }
+        )
+    }
+
 
     ProductsContent(
-        products = displayProducts,
+        products = productsToShow,
         totalCost = state.totalCost,
         totalSaleValue = state.totalSaleValue,
+        showOnlyLowStock = state.showOnlyLowStock,
+        lowStockCount = state.lowStockProducts.size,
+        onToggleLowStock = { viewModel.toggleLowStockFilter() },
         onNewSaleClick = onNewSaleClick,
         onSalesHistoryClick = onSalesHistoryClick,
-        showOnlyLowStock = showOnlyLowStock,
-        onToggleFilter = { showOnlyLowStock = !showOnlyLowStock },
-        onAddClick = {
-            editingProduct = null
-            showFormDialog = true
+        onAddClick = { editingProduct = null; showFormDialog = true },
+        onEdit = { product -> editingProduct = product; showFormDialog = true },
+        onDelete = { product -> viewModel.delete(product) },
+        snackbarHostState = snackbarHostState,
+        onRestock = { product ->
+            restockTarget = product
+            restockAmountText = ""
         },
-        onEdit = { product ->
-            editingProduct = product
-            showFormDialog = true
-        },
-        onDelete = { product ->
-            viewModel.delete(product)
-        }
+        sort = state.sort,
+        onSortChange = { viewModel.setSort(it)}
     )
 }
 
@@ -112,14 +154,20 @@ fun ProductsContent(
     totalCost: Double,
     totalSaleValue: Double,
     showOnlyLowStock: Boolean,
-    onToggleFilter: () -> Unit,
+    lowStockCount: Int,
+    onToggleLowStock: () -> Unit,
     onAddClick: () -> Unit,
     onEdit: (ProductEntity) -> Unit,
     onDelete: (ProductEntity) -> Unit,
     onNewSaleClick: () -> Unit,
-    onSalesHistoryClick: () -> Unit
+    onSalesHistoryClick: () -> Unit,
+    snackbarHostState: SnackbarHostState,
+    onRestock: (ProductEntity) -> Unit,
+    sort: ProductSort,
+    onSortChange: (ProductSort) -> Unit
 )   {
     Scaffold(
+        snackbarHost = {SnackbarHost(hostState = snackbarHostState)},
         topBar = {
             TopAppBar(
                 title = { Text("Stocky - Products") },
@@ -146,28 +194,36 @@ fun ProductsContent(
                 totalSaleValue = totalSaleValue
             )
 
+            Spacer(modifier = Modifier.height(12.dp))
+
+            SortDropdown(
+                sort = sort,
+                onSortChange = onSortChange
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text("Productos", style = MaterialTheme.typography.titleMedium)
 
+                FilterChip(
+                    selected = showOnlyLowStock,
+                    onClick = onToggleLowStock,
+                    label = {
+                        Text(
+                            if (showOnlyLowStock) "Stock bajo ($lowStockCount)"
+                            else "Solo stock bajo ($lowStockCount)"
+                        )
+                    }
+                )
             }
-            Spacer(modifier = Modifier.height(8.dp))
 
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Productos")
-
-                TextButton(onClick = onToggleFilter) {
-                    Text(
-                        if (showOnlyLowStock) "Mostrar todos"
-                        else "Solo stock bajo"
-                    )
-                }
-            }
+            Spacer(Modifier.height(12.dp))
 
             if(products.isEmpty()) {
                 Text("No hay productos todavia")
@@ -180,7 +236,8 @@ fun ProductsContent(
                         ProductRow(
                             product = product,
                             onEdit = { onEdit(product)},
-                            onDelete = { onDelete(product) }
+                            onDelete = { onDelete(product) },
+                            onRestock = {onRestock(product)}
                         )
                     }
                 }
@@ -199,8 +256,8 @@ fun MetricsCard(
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Metricas", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Total a costo: $totalCost ARS")
-            Text("Total a venta: $totalSaleValue ARS")
+            Text("Total a costo: ${CurrencyFormatter.formatARS(totalCost)}")
+            Text("Total a venta: ${CurrencyFormatter.formatARS(totalSaleValue)}")
         }
     }
 }
@@ -209,7 +266,8 @@ fun MetricsCard(
 fun ProductRow(
     product: ProductEntity,
     onEdit: () -> Unit,
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onRestock: () -> Unit
 ) {
     val isLowStock = product.currentStock <= product.minimumStock
 
@@ -227,13 +285,112 @@ fun ProductRow(
                     text = "Stock: ${product.currentStock} | Min: ${product.minimumStock}",
                     color = if (isLowStock) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
                 )
-                Text("Costo: ${product.cost} | Venta: ${product.salePrice}")
+                Text("Costo: ${CurrencyFormatter.formatARS(product.cost)} | Venta: ${CurrencyFormatter.formatARS(product.salePrice)}")
                 Text("Cat: ${product.category}")
             }
             Column {
                 TextButton(onClick = onEdit) { Text("Editar") }
                 TextButton(onClick = onDelete) { Text("Eliminar")}
+
+                if(isLowStock){
+                    TextButton(onClick = onRestock) {
+                        Text("Reponer")
+                    }
+                }
             }
+        }
+    }
+}
+
+@Composable
+fun RestockDialog(
+    product: ProductEntity,
+    amountText: String,
+    onAmountChange: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Reponer stock") },
+        text = {
+            Column {
+                Text(product.name)
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = amountText,
+                    onValueChange = onAmountChange,
+                    label = { Text("Cantidad a agregar") }
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("Confirmar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SortDropdown(
+    sort: ProductSort,
+    onSortChange: (ProductSort) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false)}
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded}
+    ) {
+        OutlinedTextField(
+            value = when(sort) {
+                ProductSort.NAME -> "Nombre"
+                ProductSort.STOCK -> "Stock"
+                ProductSort.PRICE -> "Precio"
+            },
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Ordenar por")},
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded)},
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(
+                text = {Text("Nombre")},
+                onClick = {
+                    onSortChange(ProductSort.NAME)
+                    expanded = false
+                }
+            )
+            DropdownMenuItem(
+                text = {Text("Stock")},
+                onClick = {
+                    onSortChange(ProductSort.STOCK)
+                    expanded = false
+                }
+            )
+            DropdownMenuItem(
+                text = {Text("Precio")},
+                onClick = {
+                    onSortChange(ProductSort.PRICE)
+                    expanded = false
+                }
+            )
         }
     }
 }

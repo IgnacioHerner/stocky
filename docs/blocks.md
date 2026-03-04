@@ -393,4 +393,97 @@ Resultado: la app ahora inicia en un Home Dashboard (base) y permite entrar a lo
 
 Resultado: el MVP inicia en un dashboard visual y útil, listo para demo y publicación.
 
+### Bloque 3.9 – unitCost histórico en SaleItem (ganancia consistente)
 
+- Se agregó el campo `unitCost` en `SaleItemEntity` para congelar el costo al momento de registrar una venta.
+- Al crear los items de la venta, se obtiene el `cost` del producto desde DB y se guarda como `unitCost`.
+- Se incrementó la versión de `StockyDatabase` para reflejar el cambio de esquema.
+- Como se usa `fallbackToDestructiveMigration()`, la base local se recrea automáticamente (se pierden datos de prueba).
+- Resultado: la ganancia histórica no cambia si se editan costos de productos después.
+
+### Bloque 3.10 – Validación de stock en registerSale (Repository)
+
+- Se implementó validación de stock dentro de withTransaction antes de insertar la venta.
+- Se consolidan cantidades por producto (groupBy + sumOf) para validar correctamente si un producto se repite en el carrito.
+- Si stock insuficiente → InsufficientStockException y rollback automático.
+- Luego de validar, se inserta Sale, SaleItems (con unitCost) y se actualiza stock con el consolidado.
+
+### Bloque 3.11 – Snackbar de resultado + navegación post-venta
+
+- Se agregó feedback UX al confirmar venta:
+    - En éxito: snackbar “Venta registrada”, limpieza del carrito y navegación al historial.
+    - En error: snackbar con mensaje y se mantiene el carrito para corregir.
+- Se controló la navegación desde la UI mediante flags en NewSaleUiState.
+- Se agregaron métodos consumeMessage/consumeNavigation para evitar re-ejecución en recomposiciones.
+
+### Bloque 3.12 – Filtros rápidos en historial de ventas
+
+- Se agregaron quick filters para mejorar UX del historial:
+    - Hoy, Últimos 7 días, Este mes, Limpiar.
+- Se centralizó la lógica de rangos de fechas en DateRanges (java.time) para evitar bugs de zona horaria.
+- Los filtros actualizan from/to en el state y refrescan la lista filtrada.
+
+Resultado: filtrado por fecha en un toque, ideal para demo y uso real.
+
+### Bloque 3.13 – Formateo consistente de moneda (ARS)
+
+- Se creó CurrencyFormatter usando NumberFormat y Locale("es", "AR").
+- Se centralizó el formateo monetario para evitar hardcode.
+- Se aplicó en:
+    - Dashboard
+    - Historial
+    - Detalle de venta
+    - Métricas
+      Resultado: formato profesional con separadores de miles y dos decimales.
+
+
+### Bloque 3.14 – Indicador de Stock Bajo en Home (accionable)
+
+- Se agregó una card en Home que muestra la cantidad de productos con stock bajo.
+- La card es clickeable y navega a Productos activando el filtro "solo stock bajo".
+- Home también fuerza el estado del filtro al entrar a Productos normal (desactiva filtro).
+- El filtro vive en ProductsViewModel (showOnlyLowStock) para permitir control desde navegación y extensión futura.
+
+### Bloque 3.15 – Snackbars pro en Products (one-shot events)
+
+- Se implementó un flujo de eventos (SharedFlow) para mensajes UI de una sola vez.
+- ProductsViewModel emite ProductsUiEvent.ShowSnackbar al crear/editar/eliminar.
+- ProductsScreen colecta events con LaunchedEffect y muestra SnackbarHostState.
+- Se evitó guardar mensajes en UiState para prevenir repeticiones por recomposición.
+
+### Bloque 3.16 – Reposición rápida de stock
+
+- Se agregó acción "Reponer" visible solo en productos con stock bajo.
+- La reposición abre un diálogo para ingresar cantidad a sumar al stock.
+- La actualización se persiste con Room mediante una query atómica:
+  UPDATE products SET currentStock = currentStock + :amount WHERE id = :productId
+- Se reutilizó el patrón de eventos (SharedFlow) para mostrar Snackbar de confirmación/error.
+
+### Bloque 3.17 – Producto más vendido
+
+Se agregó al dashboard el cálculo del producto más vendido.
+
+El cálculo se realiza agrupando las ventas por productId y sumando las cantidades vendidas.
+
+Se muestra en Home una card con:
+- nombre del producto
+- cantidad total vendida
+
+Esto agrega información de negocio útil al dashboard.
+
+### Bloque 3.18 – Ordenar productos
+
+- Se agregó soporte de ordenamiento de productos por:
+    - Nombre
+    - Stock
+    - Precio
+- El criterio de orden se guarda en ViewModel (MutableStateFlow) para mantener consistencia entre recomposiciones y navegación.
+- La UI expone un dropdown "Ordenar por" que actualiza el criterio mediante setSort().
+- El orden se aplica al flujo principal antes de derivar lowStockProducts para que ambas listas compartan el mismo orden.
+
+### Bloque 3.19 – Pulido visual del Home Dashboard
+
+- Se mejoraron las cards de métricas para tener jerarquía visual consistente (título + valor grande) y soporte de íconos.
+- Se actualizó ActionCard para mantener el mismo layout visual (icono + textos).
+- Se reemplazaron textos sueltos por cards para que el dashboard se perciba como UI profesional.
+- Se unificaron paddings (16dp) y márgenes (12dp) para consistencia.

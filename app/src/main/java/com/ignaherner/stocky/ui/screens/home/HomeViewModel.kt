@@ -36,7 +36,7 @@ class HomeViewModel(
 
                 // 3) Stock bajo
                 val lowStockCount = products.count { product ->
-                    product.cost <= product.minimumStock
+                    product.currentStock <= product.minimumStock
                 }
 
                 // 4) Ganancia historica
@@ -45,16 +45,35 @@ class HomeViewModel(
 
                 val totalProfitAllTime = salesWithItems.sumOf { saleWithItems ->
                     saleWithItems.items.sumOf { item ->
-                        val unitCost = costById[item.productId] ?: 0.0
-                        (item.unitPrice - unitCost) * item.quantity
+                        (item.unitPrice - item.unitCost) * item.quantity
                     }
                 }
+
+                // 5) Producto más vendido
+                val salesByProduct = mutableMapOf<Long, Int>()
+
+                salesWithItems.forEach { sale ->
+                    sale.items.forEach { item ->
+                        salesByProduct[item.productId] =
+                            (salesByProduct[item.productId] ?: 0) + item.quantity
+                    }
+                }
+
+                val topEntry = salesByProduct.maxByOrNull { it.value }
+
+                val topProductName = products
+                    .firstOrNull { it.id == topEntry?.key }
+                    ?.name
+
+                val topProductUnits = topEntry?.value ?: 0
 
                 HomeUiState(
                     totalInventoryCost = totalCost,
                     totalInventorySaleValue = totalSaleValue,
                     totalProfitAllTime = totalProfitAllTime,
-                    lowStockCount = lowStockCount
+                    lowStockCount = lowStockCount,
+                    topProductName = topProductName,
+                    topProductUnits = topProductUnits
                 )
 
             }.collect { newState ->

@@ -8,13 +8,9 @@ import androidx.navigation.compose.rememberNavController
 import com.ignaherner.stocky.ui.navigation.StockyNavGraph
 import com.ignaherner.stocky.ui.screens.home.HomeViewModel
 import com.ignaherner.stocky.ui.screens.home.HomeViewModelFactory
-import com.ignaherner.stocky.ui.screens.products.ProductsScreen
 import com.ignaherner.stocky.ui.screens.products.ProductsViewModel
 import com.ignaherner.stocky.ui.screens.products.ProductsViewModelFactory
-import com.ignaherner.stocky.ui.screens.sales.NewSaleScreen
-import com.ignaherner.stocky.ui.screens.sales.NewSaleViewModel
-import com.ignaherner.stocky.ui.screens.sales.NewSaleViewModelFactory
-import com.ignaherner.stocky.ui.screens.sales.sale_detail.SaleDetailViewModel
+import com.ignaherner.stocky.ui.screens.sales.new_sale.NewSaleViewModelFactory
 import com.ignaherner.stocky.ui.screens.sales.sale_detail.SaleDetailViewModelFactory
 import com.ignaherner.stocky.ui.screens.sales.sales_history.SalesHistoryViewModel
 import com.ignaherner.stocky.ui.screens.sales.sales_history.SalesHistoryViewModelFactory
@@ -50,8 +46,6 @@ class MainActivity : ComponentActivity() {
         val productsViewModel: ProductsViewModel =
             ViewModelProvider(this, productsFactory)[ProductsViewModel::class.java]
 
-        val newSaleViewModel: NewSaleViewModel =
-            ViewModelProvider(this, newSaleFactory)[NewSaleViewModel::class.java]
 
         val salesHistoryViewModel =
             ViewModelProvider(this, salesHistoryFactory)[SalesHistoryViewModel::class.java]
@@ -75,7 +69,6 @@ class MainActivity : ComponentActivity() {
                 StockyNavGraph(
                     navController = navController,
                     productsViewModelProvider = {productsViewModel},
-                    newSaleViewModelProvider = {newSaleViewModel},
                     salesHistoryModelProvider = {salesHistoryViewModel},
                     saleDetailFactoryProvider = saleDetailFactoryProvider,
                     homeViewModelProvider = {homeViewModel}
