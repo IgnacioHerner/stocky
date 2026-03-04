@@ -240,3 +240,9 @@ Principio aplicado:
 - Home define dos entradas:
     - Productos: abre lista completa (showOnlyLowStock = false).
     - Stock bajo: abre lista filtrada (showOnlyLowStock = true).
+
+## Eventos UI (Snackbars) con SharedFlow
+
+- Se decidió separar estado estable (StateFlow) de eventos one-shot (SharedFlow).
+- Los snackbars se disparan desde el ViewModel mediante UiEvent para evitar mensajes pegados o repetidos.
+- Patrón reutilizable para NewSale y otras pantallas.
