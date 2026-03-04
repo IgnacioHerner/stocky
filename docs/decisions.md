@@ -269,3 +269,8 @@ Ventajas:
     - Persistencia del criterio al navegar
     - Escalable a más filtros (categoría/búsqueda)
     - Lógica consistente y testeable
+
+## Home dashboard: consistencia visual
+
+- Se decidió unificar el estilo de cards (MetricCard y ActionCard) usando la misma estructura: icono opcional + columna con título y valor/subtítulo.
+- Se priorizó jerarquía visual simple y consistente para una demo publicable (LinkedIn) sin entrar en diseño avanzado.

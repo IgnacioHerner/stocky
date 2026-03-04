@@ -69,19 +69,21 @@ dependencies {
 
     // --- NUEVO: Lifecycle para Compose (recomendado) ---
     // Te permite collectAsStateWithLifecycle y mejor manejo de lifecycle en Compose
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.10.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
 
     // --- NUEVO: Navigation Compose ---
-    implementation("androidx.navigation:navigation-compose:2.8.5")
+    implementation(libs.androidx.navigation.compose)
 
     // constraintLayout Compose
-    implementation("androidx.constraintlayout:constraintlayout-compose:1.1.1")
+    implementation(libs.androidx.constraintlayout.compose)
 
     // --- NUEVO: Room (DB local) ---
-    implementation("androidx.room:room-runtime:2.8.1")
-    implementation("androidx.room:room-ktx:2.8.1")
-    kapt("androidx.room:room-compiler:2.8.1")
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    kapt(libs.androidx.room.compiler)
+
+    implementation(libs.androidx.compose.material.icons.extended)
 
     // JUnit: tests unitarios (local)
     testImplementation(libs.junit)

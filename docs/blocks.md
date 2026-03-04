@@ -480,3 +480,10 @@ Esto agrega información de negocio útil al dashboard.
 - El criterio de orden se guarda en ViewModel (MutableStateFlow) para mantener consistencia entre recomposiciones y navegación.
 - La UI expone un dropdown "Ordenar por" que actualiza el criterio mediante setSort().
 - El orden se aplica al flujo principal antes de derivar lowStockProducts para que ambas listas compartan el mismo orden.
+
+### Bloque 3.19 – Pulido visual del Home Dashboard
+
+- Se mejoraron las cards de métricas para tener jerarquía visual consistente (título + valor grande) y soporte de íconos.
+- Se actualizó ActionCard para mantener el mismo layout visual (icono + textos).
+- Se reemplazaron textos sueltos por cards para que el dashboard se perciba como UI profesional.
+- Se unificaron paddings (16dp) y márgenes (12dp) para consistencia.
