@@ -282,3 +282,9 @@ Ventajas:
     - menor duplicación
     - facilidad de extensión a más pantallas
 - Los empty states incluyen un “next step” (acción) cuando aplica.
+
+## Loading states con `loadedOnce` (UI)
+
+- Se decidió implementar loading de manera simple en UI con un flag `loadedOnce`.
+- Motivo: evitar refactors grandes de ViewModel/Repository y aun así mejorar UX.
+- El empty state solo se muestra luego de la primera carga.

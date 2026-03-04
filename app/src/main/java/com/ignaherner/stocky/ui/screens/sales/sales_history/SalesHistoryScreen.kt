@@ -34,11 +34,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.stocky.ui.components.EmptyState
+import com.ignaherner.stocky.ui.components.LoadingState
 import com.ignaherner.stocky.ui.utils.CurrencyFormatter
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -90,6 +92,10 @@ fun SalesHistoryScreen(
 
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
+    var loadedOnce by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(state.sales) { loadedOnce = true }
+
+    val isLoading = !loadedOnce
 
     Scaffold(
         topBar = { TopAppBar(
@@ -129,15 +135,15 @@ fun SalesHistoryScreen(
                 }
             )
 
-            if (state.sales.isEmpty()) {
-                EmptyState(
+            when{
+                isLoading -> LoadingState()
+                state.sales.isEmpty() -> EmptyState(
                     title = "No hay ventas en este rango",
                     message = "Probá cambiar el filtro de fechas o limpiarlo para ver todas.",
                     actionLabel = "Limpiar filtro",
                     onAction = { viewModel.clearFilter() }
                 )
-            } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp),
+                else -> LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxSize()) {
                     items(state.sales) { sale ->
                         SaleSummaryCard(
