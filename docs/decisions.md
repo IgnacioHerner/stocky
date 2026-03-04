@@ -274,3 +274,11 @@ Ventajas:
 
 - Se decidió unificar el estilo de cards (MetricCard y ActionCard) usando la misma estructura: icono opcional + columna con título y valor/subtítulo.
 - Se priorizó jerarquía visual simple y consistente para una demo publicable (LinkedIn) sin entrar en diseño avanzado.
+
+## Empty states reutilizables
+
+- Se decidió centralizar estados vacíos en un composable `EmptyState` para:
+    - consistencia visual
+    - menor duplicación
+    - facilidad de extensión a más pantallas
+- Los empty states incluyen un “next step” (acción) cuando aplica.

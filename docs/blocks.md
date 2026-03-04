@@ -487,3 +487,11 @@ Esto agrega información de negocio útil al dashboard.
 - Se actualizó ActionCard para mantener el mismo layout visual (icono + textos).
 - Se reemplazaron textos sueltos por cards para que el dashboard se perciba como UI profesional.
 - Se unificaron paddings (16dp) y márgenes (12dp) para consistencia.
+
+### Bloque 3.20 – Empty states
+
+- Se creó un composable reutilizable `EmptyState` para mostrar estados vacíos de forma consistente.
+- Se aplicó en:
+    - Productos: cuando no hay productos, se guía al usuario a crear el primero.
+    - Historial de ventas: cuando no hay ventas en el rango, se ofrece limpiar el filtro.
+- Objetivo: mejorar UX y que la app se vea intencional y profesional en demos.

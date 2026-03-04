@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.stocky.data.local.entity.ProductEntity
+import com.ignaherner.stocky.ui.components.EmptyState
 import com.ignaherner.stocky.ui.utils.CurrencyFormatter
 import kotlin.math.exp
 
@@ -225,18 +226,23 @@ fun ProductsContent(
 
             Spacer(Modifier.height(12.dp))
 
-            if(products.isEmpty()) {
-                Text("No hay productos todavia")
+            if (products.isEmpty()) {
+                EmptyState(
+                    title = "No hay productos todavía",
+                    message = "Agrega tu primer producto tocando el botón +",
+                    actionLabel = "Crear producto",
+                    onAction = onAddClick,
+                )
             } else {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    items(products) { product ->
+                    items(products){ product ->
                         ProductRow(
                             product = product,
                             onEdit = { onEdit(product)},
-                            onDelete = { onDelete(product) },
+                            onDelete = { onDelete(product)},
                             onRestock = {onRestock(product)}
                         )
                     }

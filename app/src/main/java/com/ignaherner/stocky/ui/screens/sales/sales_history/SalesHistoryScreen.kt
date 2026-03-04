@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ignaherner.stocky.ui.components.EmptyState
 import com.ignaherner.stocky.ui.utils.CurrencyFormatter
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -128,8 +129,13 @@ fun SalesHistoryScreen(
                 }
             )
 
-            if (state.sales.isEmpty()){
-                Text("No hay ventas en este rango.")
+            if (state.sales.isEmpty()) {
+                EmptyState(
+                    title = "No hay ventas en este rango",
+                    message = "Probá cambiar el filtro de fechas o limpiarlo para ver todas.",
+                    actionLabel = "Limpiar filtro",
+                    onAction = { viewModel.clearFilter() }
+                )
             } else {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxSize()) {
