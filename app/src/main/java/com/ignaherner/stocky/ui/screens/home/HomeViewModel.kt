@@ -49,11 +49,31 @@ class HomeViewModel(
                     }
                 }
 
+                // 5) Producto más vendido
+                val salesByProduct = mutableMapOf<Long, Int>()
+
+                salesWithItems.forEach { sale ->
+                    sale.items.forEach { item ->
+                        salesByProduct[item.productId] =
+                            (salesByProduct[item.productId] ?: 0) + item.quantity
+                    }
+                }
+
+                val topEntry = salesByProduct.maxByOrNull { it.value }
+
+                val topProductName = products
+                    .firstOrNull { it.id == topEntry?.key }
+                    ?.name
+
+                val topProductUnits = topEntry?.value ?: 0
+
                 HomeUiState(
                     totalInventoryCost = totalCost,
                     totalInventorySaleValue = totalSaleValue,
                     totalProfitAllTime = totalProfitAllTime,
-                    lowStockCount = lowStockCount
+                    lowStockCount = lowStockCount,
+                    topProductName = topProductName,
+                    topProductUnits = topProductUnits
                 )
 
             }.collect { newState ->

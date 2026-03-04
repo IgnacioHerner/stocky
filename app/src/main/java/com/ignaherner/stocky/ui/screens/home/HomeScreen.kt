@@ -30,7 +30,7 @@ fun HomeScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        val (title, costCard, saleCard, profitCard, lowStockCard, productsCard, salesCard) = createRefs()
+        val (title, costCard, saleCard, profitCard, topProductCard ,lowStockCard, productsCard, salesCard) = createRefs()
 
         Text(
             text = "Stocky",
@@ -74,8 +74,21 @@ fun HomeScreen(
             }
         )
 
+        if(state.topProductName != null){
+            MetricCard(
+                title = "Producto más vendido",
+                value = "${state.topProductName} (${state.topProductUnits} vendidos)",
+                modifier = Modifier.constrainAs(topProductCard){
+                    top.linkTo(profitCard.bottom, margin = 12.dp)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    width = Dimension.fillToConstraints
+                }
+            )
+        }
+
         // 👇 Anchor: si hay low stock usamos lowStockCard, si no usamos profitCard
-        val topAnchor = if (state.lowStockCount > 0) lowStockCard else profitCard
+        val topAnchor = if (state.lowStockCount > 0) lowStockCard else topProductCard
 
         if (state.lowStockCount > 0) {
             ActionCard(
@@ -83,7 +96,7 @@ fun HomeScreen(
                 subtitle = "${state.lowStockCount} productos para reponer",
                 modifier = Modifier
                     .constrainAs(lowStockCard) {
-                        top.linkTo(profitCard.bottom, margin = 12.dp)
+                        top.linkTo(topProductCard.bottom, margin = 12.dp)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                         width = Dimension.fillToConstraints

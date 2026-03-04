@@ -252,3 +252,12 @@ Principio aplicado:
 - Se decidió actualizar stock con una query específica (increaseStock) en vez de actualizar toda la entidad.
 - Ventajas: operación atómica, menos riesgo de pisar campos, más simple y eficiente.
 - La UI no modifica directamente el estado; delega al ViewModel y Repository.
+
+## Producto más vendido calculado en ViewModel
+
+Se decidió calcular el producto más vendido en HomeViewModel utilizando los datos de SalesWithItems.
+
+Ventajas:
+- no requiere nueva query en Room
+- mantiene la lógica de agregación en la capa de presentación
+- evita complejidad en el DAO

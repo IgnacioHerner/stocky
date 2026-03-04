@@ -458,3 +458,15 @@ Resultado: filtrado por fecha en un toque, ideal para demo y uso real.
 - La actualización se persiste con Room mediante una query atómica:
   UPDATE products SET currentStock = currentStock + :amount WHERE id = :productId
 - Se reutilizó el patrón de eventos (SharedFlow) para mostrar Snackbar de confirmación/error.
+
+### Bloque 3.17 – Producto más vendido
+
+Se agregó al dashboard el cálculo del producto más vendido.
+
+El cálculo se realiza agrupando las ventas por productId y sumando las cantidades vendidas.
+
+Se muestra en Home una card con:
+- nombre del producto
+- cantidad total vendida
+
+Esto agrega información de negocio útil al dashboard.
