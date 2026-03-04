@@ -246,3 +246,9 @@ Principio aplicado:
 - Se decidió separar estado estable (StateFlow) de eventos one-shot (SharedFlow).
 - Los snackbars se disparan desde el ViewModel mediante UiEvent para evitar mensajes pegados o repetidos.
 - Patrón reutilizable para NewSale y otras pantallas.
+
+## Reposición de stock con query atómica
+
+- Se decidió actualizar stock con una query específica (increaseStock) en vez de actualizar toda la entidad.
+- Ventajas: operación atómica, menos riesgo de pisar campos, más simple y eficiente.
+- La UI no modifica directamente el estado; delega al ViewModel y Repository.

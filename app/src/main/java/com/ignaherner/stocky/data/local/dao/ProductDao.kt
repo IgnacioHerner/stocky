@@ -27,6 +27,10 @@ interface ProductDao {
     @Query("SELECT * FROM products WHERE id = :id LIMIT 1")
     suspend fun getById(id: Long): ProductEntity?
 
+    // Incrementar stock
+    @Query("UPDATE products SET currentStock = currentStock + :amount WHERE id = :productId")
+    suspend fun increaseStock(productId: Long, amount: Int): Int
+
     // Actualizar stock
     @Query("UPDATE products SET currentStock = :newStock WHERE id = :productId")
     suspend fun updateStock(productId: Long, newStock: Int)

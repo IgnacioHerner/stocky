@@ -444,9 +444,17 @@ Resultado: filtrado por fecha en un toque, ideal para demo y uso real.
 - Home también fuerza el estado del filtro al entrar a Productos normal (desactiva filtro).
 - El filtro vive en ProductsViewModel (showOnlyLowStock) para permitir control desde navegación y extensión futura.
 
-### Bloque 3.15.A – Snackbars pro en Products (one-shot events)
+### Bloque 3.15 – Snackbars pro en Products (one-shot events)
 
 - Se implementó un flujo de eventos (SharedFlow) para mensajes UI de una sola vez.
 - ProductsViewModel emite ProductsUiEvent.ShowSnackbar al crear/editar/eliminar.
 - ProductsScreen colecta events con LaunchedEffect y muestra SnackbarHostState.
 - Se evitó guardar mensajes en UiState para prevenir repeticiones por recomposición.
+
+### Bloque 3.16 – Reposición rápida de stock
+
+- Se agregó acción "Reponer" visible solo en productos con stock bajo.
+- La reposición abre un diálogo para ingresar cantidad a sumar al stock.
+- La actualización se persiste con Room mediante una query atómica:
+  UPDATE products SET currentStock = currentStock + :amount WHERE id = :productId
+- Se reutilizó el patrón de eventos (SharedFlow) para mostrar Snackbar de confirmación/error.

@@ -16,6 +16,12 @@ class ProductRepository(
     fun observeTotalSaleValue(): Flow<Double> = productDao.observeTotalSaleValue()
 
     // Acciones puntuales
+
+    suspend fun increaseStock(productId: Long, amount: Int) {
+        require(amount > 0){"amount must be > 0"}
+        productDao.increaseStock(productId, amount)
+    }
+
     suspend fun insert(product: ProductEntity) = productDao.insert(product)
 
     suspend fun update(product: ProductEntity) = productDao.update(product)

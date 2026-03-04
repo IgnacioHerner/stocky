@@ -52,6 +52,17 @@ class ProductsViewModel(
         showOnlyLowStockFlow.value = !showOnlyLowStockFlow.value
     }
 
+    fun restock(productId: Long, amount: Int) {
+        viewModelScope.launch {
+            if(amount <= 0) {
+                _events.emit(ProductsUiEvent.ShowSnackbar("Ingresá una cantidad válida"))
+                return@launch
+            }
+            repository.increaseStock(productId, amount)
+            _events.emit(ProductsUiEvent.ShowSnackbar("Stock actualizado"))
+        }
+    }
+
     fun insert(product: ProductEntity) {
         viewModelScope.launch {
             repository.insert(product)
