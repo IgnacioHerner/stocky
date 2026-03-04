@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.stocky.data.local.entity.ProductEntity
 import com.ignaherner.stocky.ui.screens.sales.new_sale.NewSaleViewModel
+import com.ignaherner.stocky.ui.utils.CurrencyFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -114,8 +115,8 @@ fun NewSaleScreen(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(item.name, style = MaterialTheme.typography.titleMedium)
-                                Text("Cantidad: ${item.quantity}  •  Precio: ${item.unitPrice}")
-                                Text("Subtotal: ${item.lineTotal}")
+                                Text("Cantidad: ${item.quantity}  •  Precio: ${CurrencyFormatter.formatARS(item.unitPrice)}")
+                                Text("Subtotal: ${CurrencyFormatter.formatARS(item.lineTotal)}")
                             }
                             TextButton(onClick = { viewModel.removeFromCart(item.productId) }) {
                                 Text("Quitar")
@@ -125,7 +126,7 @@ fun NewSaleScreen(
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
-                Text("Total: ${state.total} ARS", style = MaterialTheme.typography.titleMedium)
+                Text("Total: ${CurrencyFormatter.formatARS(state.total)} ARS", style = MaterialTheme.typography.titleMedium)
             }
 
             Button(

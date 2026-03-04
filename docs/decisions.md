@@ -225,3 +225,18 @@ Principio aplicado:
 - Se decidió agregar filtros rápidos (Hoy/7 días/Mes) para acelerar el uso del historial.
 - Se calcula el rango usando startOfDay/endOfDay con ZoneId.systemDefault() para consistencia local.
 - Se mantiene el filtro manual por DatePicker como opción complementaria.
+
+## Formateo de dinero
+
+- Se decidió usar NumberFormat en vez de string interpolation.
+- Se centralizó en un object reutilizable.
+- Se utiliza Locale("es","AR") para coherencia local.
+- Evita problemas futuros al agregar soporte multi-moneda.
+
+## Home accionable: Stock bajo
+
+- Se decidió que Home sea un dashboard con acciones (no solo métricas).
+- El filtro "solo stock bajo" se controla desde ProductsViewModel para ser compartido entre pantallas.
+- Home define dos entradas:
+    - Productos: abre lista completa (showOnlyLowStock = false).
+    - Stock bajo: abre lista filtrada (showOnlyLowStock = true).

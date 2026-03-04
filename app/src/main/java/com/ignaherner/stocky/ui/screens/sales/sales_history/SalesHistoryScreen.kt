@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ignaherner.stocky.ui.utils.CurrencyFormatter
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
@@ -255,7 +256,7 @@ fun SaleSummaryCard(
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Text(dateText, style = MaterialTheme.typography.titleMedium)
-            Text("Total: ${sale.total} ARS")
+            Text("Total: ${CurrencyFormatter.formatARS(sale.total)} ARS")
             Text("Lineas: ${sale.itemsCount} = Productos: ${sale.productsCount}")
         }
     }

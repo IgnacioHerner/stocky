@@ -36,7 +36,7 @@ class HomeViewModel(
 
                 // 3) Stock bajo
                 val lowStockCount = products.count { product ->
-                    product.cost <= product.minimumStock
+                    product.currentStock <= product.minimumStock
                 }
 
                 // 4) Ganancia historica
@@ -45,8 +45,7 @@ class HomeViewModel(
 
                 val totalProfitAllTime = salesWithItems.sumOf { saleWithItems ->
                     saleWithItems.items.sumOf { item ->
-                        val unitCost = costById[item.productId] ?: 0.0
-                        (item.unitPrice - unitCost) * item.quantity
+                        (item.unitPrice - item.unitCost) * item.quantity
                     }
                 }
 

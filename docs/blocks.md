@@ -424,3 +424,22 @@ Resultado: el MVP inicia en un dashboard visual y útil, listo para demo y publi
 - Los filtros actualizan from/to en el state y refrescan la lista filtrada.
 
 Resultado: filtrado por fecha en un toque, ideal para demo y uso real.
+
+### Bloque 3.13 – Formateo consistente de moneda (ARS)
+
+- Se creó CurrencyFormatter usando NumberFormat y Locale("es", "AR").
+- Se centralizó el formateo monetario para evitar hardcode.
+- Se aplicó en:
+    - Dashboard
+    - Historial
+    - Detalle de venta
+    - Métricas
+      Resultado: formato profesional con separadores de miles y dos decimales.
+
+
+### Bloque 3.14 – Indicador de Stock Bajo en Home (accionable)
+
+- Se agregó una card en Home que muestra la cantidad de productos con stock bajo.
+- La card es clickeable y navega a Productos activando el filtro "solo stock bajo".
+- Home también fuerza el estado del filtro al entrar a Productos normal (desactiva filtro).
+- El filtro vive en ProductsViewModel (showOnlyLowStock) para permitir control desde navegación y extensión futura.

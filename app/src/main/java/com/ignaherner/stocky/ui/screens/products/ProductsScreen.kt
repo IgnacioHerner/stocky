@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -23,10 +24,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.stocky.data.local.entity.ProductEntity
+import com.ignaherner.stocky.ui.utils.CurrencyFormatter
 
 @Composable
 fun ProductsScreen(
@@ -39,13 +42,9 @@ fun ProductsScreen(
     var showFormDialog by rememberSaveable { mutableStateOf(false)}
     var editingProduct by rememberSaveable { mutableStateOf<ProductEntity?>(null)}
 
-    var showOnlyLowStock by rememberSaveable { mutableStateOf(false)}
+    val productsToShow = if (state.showOnlyLowStock) state.lowStockProducts else state.products
 
-    val displayProducts = if(showOnlyLowStock){
-        state.lowStockProducts
-    } else {
-        state.products
-    }
+
 
     if (showFormDialog) {
         ProductFormDialog(
@@ -84,24 +83,17 @@ fun ProductsScreen(
 
 
     ProductsContent(
-        products = displayProducts,
+        products = productsToShow,
         totalCost = state.totalCost,
         totalSaleValue = state.totalSaleValue,
+        showOnlyLowStock = state.showOnlyLowStock,
+        lowStockCount = state.lowStockProducts.size,
+        onToggleLowStock = { viewModel.toggleLowStockFilter() },
         onNewSaleClick = onNewSaleClick,
         onSalesHistoryClick = onSalesHistoryClick,
-        showOnlyLowStock = showOnlyLowStock,
-        onToggleFilter = { showOnlyLowStock = !showOnlyLowStock },
-        onAddClick = {
-            editingProduct = null
-            showFormDialog = true
-        },
-        onEdit = { product ->
-            editingProduct = product
-            showFormDialog = true
-        },
-        onDelete = { product ->
-            viewModel.delete(product)
-        }
+        onAddClick = { editingProduct = null; showFormDialog = true },
+        onEdit = { product -> editingProduct = product; showFormDialog = true },
+        onDelete = { product -> viewModel.delete(product) }
     )
 }
 
@@ -112,7 +104,8 @@ fun ProductsContent(
     totalCost: Double,
     totalSaleValue: Double,
     showOnlyLowStock: Boolean,
-    onToggleFilter: () -> Unit,
+    lowStockCount: Int,
+    onToggleLowStock: () -> Unit,
     onAddClick: () -> Unit,
     onEdit: (ProductEntity) -> Unit,
     onDelete: (ProductEntity) -> Unit,
@@ -153,21 +146,28 @@ fun ProductsContent(
                 Text("Productos", style = MaterialTheme.typography.titleMedium)
 
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             Row(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Productos")
+                Text("Productos", style = MaterialTheme.typography.titleMedium)
 
-                TextButton(onClick = onToggleFilter) {
-                    Text(
-                        if (showOnlyLowStock) "Mostrar todos"
-                        else "Solo stock bajo"
-                    )
-                }
+                FilterChip(
+                    selected = showOnlyLowStock,
+                    onClick = onToggleLowStock,
+                    label = {
+                        Text(
+                            if (showOnlyLowStock) "Stock bajo ($lowStockCount)"
+                            else "Solo stock bajo ($lowStockCount)"
+                        )
+                    }
+                )
             }
+
+            Spacer(Modifier.height(12.dp))
 
             if(products.isEmpty()) {
                 Text("No hay productos todavia")
@@ -199,8 +199,8 @@ fun MetricsCard(
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Metricas", style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Total a costo: $totalCost ARS")
-            Text("Total a venta: $totalSaleValue ARS")
+            Text("Total a costo: ${CurrencyFormatter.formatARS(totalCost)}")
+            Text("Total a venta: ${CurrencyFormatter.formatARS(totalSaleValue)}")
         }
     }
 }
@@ -227,7 +227,7 @@ fun ProductRow(
                     text = "Stock: ${product.currentStock} | Min: ${product.minimumStock}",
                     color = if (isLowStock) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
                 )
-                Text("Costo: ${product.cost} | Venta: ${product.salePrice}")
+                Text("Costo: ${CurrencyFormatter.formatARS(product.cost)} | Venta: ${CurrencyFormatter.formatARS(product.salePrice)}")
                 Text("Cat: ${product.category}")
             }
             Column {

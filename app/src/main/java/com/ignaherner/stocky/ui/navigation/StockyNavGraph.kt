@@ -36,10 +36,19 @@ fun StockyNavGraph(
         modifier = modifier
     ) {
         composable (Routes.HOME) {
+            val productsVw = productsViewModelProvider()
+
             HomeScreen(
                 viewModel = homeViewModelProvider(),
-                onProductsClick = {navController.navigate(Routes.PRODUCTS)},
-                onSalesClick = {navController.navigate(Routes.SALES_HISTORY)}
+                onProductsClick = {
+                    productsVw.setShowOnlyLowStock(false)
+                    navController.navigate(Routes.PRODUCTS)
+                },
+                onSalesClick = {navController.navigate(Routes.SALES_HISTORY)},
+                onLowStockClick = {
+                    productsVw.setShowOnlyLowStock(true)
+                    navController.navigate(Routes.PRODUCTS)
+                }
             )
         }
 
