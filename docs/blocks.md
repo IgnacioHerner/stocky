@@ -470,3 +470,13 @@ Se muestra en Home una card con:
 - cantidad total vendida
 
 Esto agrega información de negocio útil al dashboard.
+
+### Bloque 3.18 – Ordenar productos
+
+- Se agregó soporte de ordenamiento de productos por:
+    - Nombre
+    - Stock
+    - Precio
+- El criterio de orden se guarda en ViewModel (MutableStateFlow) para mantener consistencia entre recomposiciones y navegación.
+- La UI expone un dropdown "Ordenar por" que actualiza el criterio mediante setSort().
+- El orden se aplica al flujo principal antes de derivar lowStockProducts para que ambas listas compartan el mismo orden.

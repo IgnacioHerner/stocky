@@ -13,7 +13,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.stocky.data.local.entity.ProductEntity
 import com.ignaherner.stocky.ui.utils.CurrencyFormatter
+import kotlin.math.exp
 
 @Composable
 fun ProductsScreen(
@@ -137,7 +141,9 @@ fun ProductsScreen(
         onRestock = { product ->
             restockTarget = product
             restockAmountText = ""
-        }
+        },
+        sort = state.sort,
+        onSortChange = { viewModel.setSort(it)}
     )
 }
 
@@ -156,7 +162,9 @@ fun ProductsContent(
     onNewSaleClick: () -> Unit,
     onSalesHistoryClick: () -> Unit,
     snackbarHostState: SnackbarHostState,
-    onRestock: (ProductEntity) -> Unit
+    onRestock: (ProductEntity) -> Unit,
+    sort: ProductSort,
+    onSortChange: (ProductSort) -> Unit
 )   {
     Scaffold(
         snackbarHost = {SnackbarHost(hostState = snackbarHostState)},
@@ -186,14 +194,15 @@ fun ProductsContent(
                 totalSaleValue = totalSaleValue
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Productos", style = MaterialTheme.typography.titleMedium)
-
-            }
             Spacer(modifier = Modifier.height(12.dp))
+
+            SortDropdown(
+                sort = sort,
+                onSortChange = onSortChange
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -328,4 +337,60 @@ fun RestockDialog(
             }
         }
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SortDropdown(
+    sort: ProductSort,
+    onSortChange: (ProductSort) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false)}
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded}
+    ) {
+        OutlinedTextField(
+            value = when(sort) {
+                ProductSort.NAME -> "Nombre"
+                ProductSort.STOCK -> "Stock"
+                ProductSort.PRICE -> "Precio"
+            },
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Ordenar por")},
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded)},
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(
+                text = {Text("Nombre")},
+                onClick = {
+                    onSortChange(ProductSort.NAME)
+                    expanded = false
+                }
+            )
+            DropdownMenuItem(
+                text = {Text("Stock")},
+                onClick = {
+                    onSortChange(ProductSort.STOCK)
+                    expanded = false
+                }
+            )
+            DropdownMenuItem(
+                text = {Text("Precio")},
+                onClick = {
+                    onSortChange(ProductSort.PRICE)
+                    expanded = false
+                }
+            )
+        }
+    }
 }

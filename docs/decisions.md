@@ -261,3 +261,11 @@ Ventajas:
 - no requiere nueva query en Room
 - mantiene la lógica de agregación en la capa de presentación
 - evita complejidad en el DAO
+
+## Ordenamiento en ViewModel
+
+- Se decidió modelar el orden como estado del ViewModel (StateFlow) y no como estado local de UI.
+- Ventajas:
+    - Persistencia del criterio al navegar
+    - Escalable a más filtros (categoría/búsqueda)
+    - Lógica consistente y testeable

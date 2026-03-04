@@ -22,21 +22,36 @@ class ProductsViewModel(
     private val _events = MutableSharedFlow<ProductsUiEvent>()
     val events = _events.asSharedFlow()
 
+    private val sortFlow = MutableStateFlow(ProductSort.NAME)
+
+    fun setSort(sort: ProductSort) {
+        println("Sort cambiando a: $sort")
+        sortFlow.value = sort
+    }
+
     val uiState: StateFlow<ProductsUiState> =
         combine(
             repository.observeProducts(),
             repository.observeTotalCost(),
             repository.observeTotalSaleValue(),
-            showOnlyLowStockFlow
-        ) { products, totalCost, totalSale, showOnlyLowStock ->
+            showOnlyLowStockFlow,
+            sortFlow
+        ) { products, totalCost, totalSale, showOnlyLowStock, sort ->
+
+            val sortedProducts = when(sort) {
+                ProductSort.NAME -> products.sortedBy { it.name.lowercase() }
+                ProductSort.STOCK -> products.sortedBy { it.currentStock }
+                ProductSort.PRICE -> products.sortedBy { it.salePrice }
+            }
             ProductsUiState(
-                products = products,
+                products = sortedProducts,
                 lowStockProducts = products.filter {
                     it.currentStock <= it.minimumStock
                 },
                 totalCost = totalCost,
                 totalSaleValue = totalSale,
-                showOnlyLowStock = showOnlyLowStock
+                showOnlyLowStock = showOnlyLowStock,
+                sort = sort
             )
         }.stateIn(
             scope = viewModelScope,

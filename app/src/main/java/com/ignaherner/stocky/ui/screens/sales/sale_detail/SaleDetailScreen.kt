@@ -113,7 +113,7 @@ fun SaleDetailScreen(
                 AlertDialog(
                     onDismissRequest = { showDeleteDialog = false},
                     title = { Text("Confirmar eliminación")},
-                    text = { Text("¿Estás seguro que quéres eliminar esta venta? Esta accion restaurará el stock.")},
+                    text = { Text("¿Seguro? Esta acción no se puede deshacer.")},
                     confirmButton = {
                         TextButton(
                             onClick = {

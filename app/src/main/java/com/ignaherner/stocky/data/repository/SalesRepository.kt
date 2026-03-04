@@ -19,11 +19,6 @@ class SalesRepository(
     fun observeSalesWithItems(): Flow<List<SaleWithItems>> =
         saleDao.observeSalesWithItems()
 
-    /*
-    * Inserta venta + items y descuenta stock
-    * To_do atomico: si falla stock o cualquier paso, no se guarda nada
-    * */
-
     fun observeSalesBetween(from: Long?, to: Long?): Flow<List<SaleWithItems>> =
         saleDao.observeSalesWithItemsBetween(from, to)
 
@@ -98,7 +93,7 @@ class SalesRepository(
         database.withTransaction {
 
             // 1) Traer items vendidos
-            val items = saleDao.getSaleItems(saleId)
+            val items = saleDao.getSaleItemsBySaleId(saleId)
             if (items.isEmpty()) {
                 // Si no hay items, igual borramos sale por si existe
                 saleDao.deleteSaleById(saleId)

@@ -24,7 +24,7 @@ interface SaleDao {
     fun observeSaleWithItems(saleId: Long): Flow<SaleWithItems>
 
     @Query("SELECT * FROM sale_items WHERE saleId = :saleId")
-    suspend fun getSaleItems(saleId: Long): List<SaleItemEntity>
+    suspend fun getSaleItemsBySaleId(saleId: Long): List<SaleItemEntity>
 
     @Query("DELETE FROM sale_items WHERE saleId = :saleId")
     suspend fun deleteSaleItemsBySaleId(saleId: Long)

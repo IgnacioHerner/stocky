@@ -7,5 +7,6 @@ data class ProductsUiState(
     val lowStockProducts: List<ProductEntity> = emptyList(),
     val totalCost: Double = 0.0,
     val totalSaleValue: Double = 0.0,
-    val showOnlyLowStock: Boolean = false
+    val showOnlyLowStock: Boolean = false,
+    val sort: ProductSort = ProductSort.NAME
 )
