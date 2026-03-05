@@ -188,7 +188,7 @@ private fun MetricCard(
                 Spacer(Modifier.height(2.dp))
                 Text(
                     text = value,
-                    style = MaterialTheme.typography.headlineSmall
+                    style = MaterialTheme.typography.titleSmall
                 )
             }
         }

@@ -1,6 +1,5 @@
 package com.ignaherner.stocky.ui.screens.products
 
-import android.app.AlertDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,8 +38,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ignaherner.stocky.data.local.entity.ProductEntity
+import com.ignaherner.stocky.ui.components.EmptyState
+import com.ignaherner.stocky.ui.components.LoadingState
 import com.ignaherner.stocky.ui.utils.CurrencyFormatter
-import kotlin.math.exp
+import kotlinx.coroutines.delay
 
 @Composable
 fun ProductsScreen(
@@ -49,6 +50,14 @@ fun ProductsScreen(
     onSalesHistoryClick: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+
+    var loadedOnce by rememberSaveable { mutableStateOf(false)}
+    LaunchedEffect(state.products) {
+        delay(500)
+        loadedOnce = true
+    }
+
+    val isLoading = !loadedOnce
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -143,7 +152,8 @@ fun ProductsScreen(
             restockAmountText = ""
         },
         sort = state.sort,
-        onSortChange = { viewModel.setSort(it)}
+        onSortChange = { viewModel.setSort(it)},
+        isLoading = isLoading
     )
 }
 
@@ -164,7 +174,8 @@ fun ProductsContent(
     snackbarHostState: SnackbarHostState,
     onRestock: (ProductEntity) -> Unit,
     sort: ProductSort,
-    onSortChange: (ProductSort) -> Unit
+    onSortChange: (ProductSort) -> Unit,
+    isLoading: Boolean,
 )   {
     Scaffold(
         snackbarHost = {SnackbarHost(hostState = snackbarHostState)},
@@ -225,20 +236,31 @@ fun ProductsContent(
 
             Spacer(Modifier.height(12.dp))
 
-            if(products.isEmpty()) {
-                Text("No hay productos todavia")
-            } else {
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(products) { product ->
-                        ProductRow(
-                            product = product,
-                            onEdit = { onEdit(product)},
-                            onDelete = { onDelete(product) },
-                            onRestock = {onRestock(product)}
-                        )
+            when{
+                isLoading -> {
+                    LoadingState()
+                }
+                products.isEmpty() -> {
+                    EmptyState(
+                        title = "No hay productos todavía",
+                        message = "Agrega tu primer producto tocando el botón +",
+                        actionLabel = "Crear producto",
+                        onAction = onAddClick,
+                    )
+                }
+                else -> {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(products){ product ->
+                            ProductRow(
+                                product = product,
+                                onEdit = { onEdit(product)},
+                                onDelete = { onDelete(product)},
+                                onRestock = {onRestock(product)}
+                            )
+                        }
                     }
                 }
             }

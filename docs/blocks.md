@@ -487,3 +487,19 @@ Esto agrega información de negocio útil al dashboard.
 - Se actualizó ActionCard para mantener el mismo layout visual (icono + textos).
 - Se reemplazaron textos sueltos por cards para que el dashboard se perciba como UI profesional.
 - Se unificaron paddings (16dp) y márgenes (12dp) para consistencia.
+
+### Bloque 3.20 – Empty states
+
+- Se creó un composable reutilizable `EmptyState` para mostrar estados vacíos de forma consistente.
+- Se aplicó en:
+    - Productos: cuando no hay productos, se guía al usuario a crear el primero.
+    - Historial de ventas: cuando no hay ventas en el rango, se ofrece limpiar el filtro.
+- Objetivo: mejorar UX y que la app se vea intencional y profesional en demos.
+
+### Bloque 3.21 – Loading states (MVP)
+
+- Se agregó un composable `LoadingState` con CircularProgressIndicator centrado.
+- Se implementó un flag `loadedOnce` en UI para diferenciar entre:
+    - lista vacía por carga inicial
+    - lista vacía real (empty state)
+- Se aplicó el patrón en Products y SalesHistory.
