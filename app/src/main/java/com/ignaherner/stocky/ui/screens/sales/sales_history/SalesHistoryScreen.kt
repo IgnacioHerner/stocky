@@ -3,6 +3,7 @@ package com.ignaherner.stocky.ui.screens.sales.sales_history
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,6 +37,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -120,40 +122,49 @@ fun SalesHistoryScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
 
-            QuickFilterRow(
-                onToday = { viewModel.setTodayFilter() },
-                onLast7Days = {viewModel.setLast7DaysFilter()},
-                onThisMonth = { viewModel.setThisMonthFilter() },
-                onClear = { viewModel.clearFilter() },
-            )
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text("Filtros", style = MaterialTheme.typography.titleMedium)
 
-            Spacer(Modifier.height(12.dp))
+                    QuickFilterRow(
+                        onToday = viewModel::setTodayFilter,
+                        onLast7Days = viewModel::setLast7DaysFilter,
+                        onThisMonth = viewModel::setThisMonthFilter,
+                        onClear = viewModel::clearFilter
+                    )
 
-            FilterRow(
-                from = state.fromSelected,
-                to = state.toSelected,
-                onApply = {fromMillis, toMillis ->
-                    viewModel.applyFilter(
-                        from = startOfLocalDayFromPicker(fromMillis),
-                        to = endOfLocalDayFromPicker(toMillis)
+                    FilterRow(
+                        from = state.fromSelected,
+                        to = state.toSelected,
+                        onApply = { fromMillis, toMillis ->
+                            viewModel.applyFilter(
+                                from = startOfLocalDayFromPicker(fromMillis),
+                                to = endOfLocalDayFromPicker(toMillis)
+                            )
+                        }
                     )
                 }
-            )
+            }
 
-            when{
+            when {
                 isLoading -> LoadingState()
                 state.sales.isEmpty() -> EmptyState(
                     title = "No hay ventas en este rango",
                     message = "Probá cambiar el filtro de fechas o limpiarlo para ver todas.",
                     actionLabel = "Limpiar filtro",
-                    onAction = { viewModel.clearFilter() }
+                    onAction = viewModel::clearFilter
                 )
-                else -> LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxSize()) {
+                else -> LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     items(state.sales) { sale ->
                         SaleSummaryCard(
                             sale = sale,
-                            onClick = {onSaleClick(sale.id)}
+                            onClick = { onSaleClick(sale.id) }
                         )
                     }
                 }
@@ -169,16 +180,15 @@ fun QuickFilterRow(
     onThisMonth: () -> Unit,
     onClear: () -> Unit
 ) {
-    Row(
+    FlowRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        AssistChip(onClick = onToday, label = { Text("Hoy")})
-        AssistChip(onClick = onLast7Days, label = { Text("7 días")})
-        AssistChip(onClick = onThisMonth, label = { Text("Mes")})
-        AssistChip(onClick = onClear, label = { Text("Limpiar")})
-
-
+        AssistChip(onClick = onToday, label = { Text("Hoy") })
+        AssistChip(onClick = onLast7Days, label = { Text("7 días") })
+        AssistChip(onClick = onThisMonth, label = { Text("Mes") })
+        AssistChip(onClick = onClear, label = { Text("Limpiar") })
     }
 }
 
@@ -200,32 +210,38 @@ fun FilterRow(
         if (to != null) selectedTo = to
     }
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        OutlinedButton(
-            onClick = {showFromPicker = true},
-            modifier = Modifier.weight(1f)
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = "Desde\n${formatSelectedDate(selectedFrom)}",
-                style = MaterialTheme.typography.bodyMedium
-            )
+            OutlinedButton(
+                onClick = { showFromPicker = true },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Desde\n${formatSelectedDate(selectedFrom)}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            OutlinedButton(
+                onClick = { showToPicker = true },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Hasta\n${formatSelectedDate(selectedTo)}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
         }
 
-        OutlinedButton(
-            onClick = {showToPicker = true},
-            modifier = Modifier.weight(1f)
+        Button(
+            onClick = { onApply(selectedFrom, selectedTo) },
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text(
-                text = "Hasta\n${formatSelectedDate(selectedTo)}",
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-
-        Button(onClick = {onApply(selectedFrom, selectedTo) }) {
-            Text("Aplicar")
+            Text("Aplicar filtro")
         }
     }
 
@@ -271,10 +287,26 @@ fun SaleSummaryCard(
             .fillMaxWidth()
             .clickable { onClick() }
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Text(dateText, style = MaterialTheme.typography.titleMedium)
-            Text("Total: ${CurrencyFormatter.formatARS(sale.total)} ARS")
-            Text("Lineas: ${sale.itemsCount} = Productos: ${sale.productsCount}")
+        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(dateText, style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = "${sale.itemsCount} productos • ${sale.productsCount} unidades",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                Text(
+                    text = CurrencyFormatter.formatARS(sale.total),
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
         }
     }
 }
